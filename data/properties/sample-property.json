@@ -1,0 +1,39 @@
+{
+  "id": "sample-property",
+  "slug": "sample-property",
+  "name": "Sample Property",
+  "status": "draft",
+  "location": {
+    "city": "To be confirmed",
+    "country": "Germany",
+    "publicArea": "Public area to be confirmed"
+  },
+  "propertyType": "apartment",
+  "channels": ["own-website", "kleinanzeigen", "immoscout24", "immowelt"],
+  "amenities": ["Bright living area", "Kitchen basics", "Good public transport access"],
+  "rules": ["Quiet hours follow house rules", "Smoking policy to be confirmed", "Pets policy to be confirmed"],
+  "units": [
+    {
+      "id": "unit-1",
+      "name": "Sample Unit",
+      "status": "draft",
+      "bedrooms": 1,
+      "maxOccupancy": 2,
+      "monthlyRentPublic": null,
+      "availabilityWindows": [
+        {
+          "from": "2026-09-01",
+          "to": null,
+          "status": "unknown",
+          "notePublic": "Availability to be confirmed by owner."
+        }
+      ]
+    }
+  ],
+  "approval": {
+    "publicFactsApproved": false,
+    "listingApproved": false,
+    "portalApproved": false
+  }
+}
+

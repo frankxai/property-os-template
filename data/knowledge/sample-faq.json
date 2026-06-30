@@ -1,0 +1,22 @@
+{
+  "id": "sample-faq",
+  "propertyId": "sample-property",
+  "status": "draft",
+  "articles": [
+    {
+      "id": "move-in-basics",
+      "title": "Move-in basics",
+      "audience": "renter",
+      "answer": "Move-in details are confirmed by the owner after the rental period and handover process are approved.",
+      "approvalRequired": true
+    },
+    {
+      "id": "maintenance-request",
+      "title": "How to report a maintenance issue",
+      "audience": "renter",
+      "answer": "Use the support form with a short description, category, and urgency. Emergency issues should use the approved emergency contact path.",
+      "approvalRequired": true
+    }
+  ]
+}
+

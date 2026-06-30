@@ -1,0 +1,18 @@
+{
+  "name": "property-os-template",
+  "version": "0.1.0",
+  "releaseDate": "2026-06-30",
+  "purpose": "Public-safe Codex and Claude ready operating workspace for rental property AI workflows.",
+  "workflows": [
+    "property-profile",
+    "listing-draft-studio",
+    "inquiry-draft-and-approval",
+    "renter-portal-knowledge",
+    "maintenance-triage",
+    "vacancy-pipeline",
+    "weekly-owner-dashboard"
+  ],
+  "privacy": "AI drafts and organizes only. Human approval is required for renter-facing outputs and sensitive decisions.",
+  "status": "template"
+}
+

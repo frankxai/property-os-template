@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frankx.ai/schemas/property-os-template/property.schema.json",
+  "title": "Property OS Property Record",
+  "type": "object",
+  "required": ["id", "slug", "name", "status", "location", "units", "approval"],
+  "properties": {
+    "id": { "type": "string" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "name": { "type": "string" },
+    "status": { "enum": ["draft", "approved", "published", "archived"] },
+    "location": {
+      "type": "object",
+      "required": ["city", "country"],
+      "properties": {
+        "city": { "type": "string" },
+        "country": { "type": "string" },
+        "publicArea": { "type": "string" }
+      }
+    },
+    "propertyType": { "type": "string" },
+    "channels": { "type": "array", "items": { "type": "string" } },
+    "amenities": { "type": "array", "items": { "type": "string" } },
+    "rules": { "type": "array", "items": { "type": "string" } },
+    "units": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status", "bedrooms", "maxOccupancy"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "enum": ["draft", "available", "occupied", "maintenance", "archived"] },
+          "bedrooms": { "type": "integer", "minimum": 0 },
+          "maxOccupancy": { "type": "integer", "minimum": 1 },
+          "monthlyRentPublic": { "type": ["number", "null"] }
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "required": ["publicFactsApproved", "listingApproved", "portalApproved"],
+      "properties": {
+        "publicFactsApproved": { "type": "boolean" },
+        "listingApproved": { "type": "boolean" },
+        "portalApproved": { "type": "boolean" }
+      }
+    }
+  }
+}
+

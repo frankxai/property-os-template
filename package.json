@@ -1,0 +1,11 @@
+{
+  "name": "property-os-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs",
+    "privacy": "node scripts/privacy-scan.mjs"
+  }
+}
+
