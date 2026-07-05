@@ -1,0 +1,12 @@
+{
+  "name": "@property-os/mcp-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "property-os-mcp": "./src/server.mjs"
+  },
+  "scripts": {
+    "smoke": "node scripts/smoke.mjs"
+  }
+}

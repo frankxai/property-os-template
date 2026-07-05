@@ -4,8 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs",
+    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs && node scripts/agent-workflow-dry-run.mjs && node mcp/server/scripts/smoke.mjs",
+    "agent:dry-run": "node scripts/agent-workflow-dry-run.mjs",
+    "mcp:smoke": "node mcp/server/scripts/smoke.mjs",
     "privacy": "node scripts/privacy-scan.mjs"
   }
 }
-

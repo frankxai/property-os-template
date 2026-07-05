@@ -20,6 +20,9 @@ description: Use when working on rental property profiles, listing drafts, rente
 - Mark renter-facing copy as `DRAFT - OWNER REVIEW REQUIRED`.
 - Keep private data out of public outputs.
 - End every workflow with a keep/change/stop decision.
+- Surface missing facts before writing polished copy.
+- Separate public-safe output from owner-private notes.
+- Treat listing publication, tenant selection, repair commitments, refunds, deposits, and legal language as owner-only decisions.
 
 ## Default Workflows
 
@@ -41,3 +44,24 @@ Return:
 - `Risks Or Unknowns`
 - `Next Action`
 
+## Workflow Contracts
+
+Listing draft:
+
+- Allowed: channel-specific draft, missing facts, checklist.
+- Blocked: automatic posting, fake urgency, unsupported claims, tenant preferences.
+
+Inquiry draft:
+
+- Allowed: polite draft from approved facts and a clear owner review note.
+- Blocked: acceptance, rejection, final price, availability promise, legal advice.
+
+Renter portal answer:
+
+- Allowed: approved knowledge only with uncertainty labels.
+- Blocked: access secrets, private renter data, unapproved policy.
+
+Maintenance triage:
+
+- Allowed: urgency class, detail requests, owner/vendor suggestion.
+- Blocked: dispatch promise, repair timing promise, liability statement.

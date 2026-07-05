@@ -1,0 +1,44 @@
+{
+  "name": "property-os",
+  "version": "0.1.0",
+  "description": "MCP capability map for Property OS hosted agents and implementer workspaces.",
+  "transports": ["stdio", "streamable-http"],
+  "resources": [
+    "property://profile/{propertyId}",
+    "property://knowledge/{propertyId}",
+    "property://listing-drafts/{propertyId}",
+    "property://agent-runs/{organizationId}",
+    "property://approvals/{organizationId}"
+  ],
+  "tools": [
+    "create_inquiry_summary",
+    "create_support_ticket_summary",
+    "draft_listing",
+    "draft_reply",
+    "request_owner_approval",
+    "create_sanitized_github_issue",
+    "run_privacy_scan",
+    "run_listing_dry_run"
+  ],
+  "prompts": [
+    "weekly_owner_review",
+    "listing_missing_facts",
+    "maintenance_triage",
+    "integration_dry_run_review",
+    "commercial_offer"
+  ],
+  "blockedV1Tools": [
+    "publish_listing",
+    "send_renter_message",
+    "dispatch_vendor",
+    "approve_applicant",
+    "disclose_access_secret",
+    "change_price_or_availability"
+  ],
+  "security": {
+    "auth": "required-for-http",
+    "auditLog": "required-for-tools",
+    "tenantIsolation": "required",
+    "ownerApproval": "required-for-consequential-actions"
+  }
+}

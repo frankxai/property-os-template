@@ -8,6 +8,10 @@
 4. Run `npm run validate`.
 5. Choose one workflow.
 
+## Hosted Runtime
+
+When the owner wants a production portal or agency install, follow `install/HOSTED-RUNTIME.md` after the local workspace validates.
+
 ## Private GitHub Repo
 
 Recommended when the owner starts using the workspace.
@@ -19,4 +23,3 @@ git commit -m "Initial property OS scaffold"
 ```
 
 Keep the repo private unless every file is public-safe.
-

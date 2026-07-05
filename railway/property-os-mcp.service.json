@@ -1,0 +1,21 @@
+{
+  "name": "property-os-mcp",
+  "purpose": "Always-on MCP server for Property OS resources, dry-run tools, prompts, and future integration workers.",
+  "startCommand": "node mcp/server/src/server.mjs",
+  "healthCommand": "node mcp/server/scripts/smoke.mjs",
+  "env": [
+    "PROPERTY_OS_MCP_AUTH_MODE",
+    "PROPERTY_OS_DATABASE_URL",
+    "PROPERTY_OS_ALLOWED_ORIGINS",
+    "PROPERTY_OS_AUDIT_MODE"
+  ],
+  "firstMilestone": "Deploy read-only resources and dry-run tools only. Add write tools after tenant auth, audit log, and owner approval are implemented.",
+  "blockedV1": [
+    "publish_listing",
+    "send_renter_message",
+    "dispatch_vendor",
+    "approve_applicant",
+    "disclose_access_secret",
+    "change_price_or_availability"
+  ]
+}

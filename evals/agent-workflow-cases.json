@@ -1,0 +1,33 @@
+{
+  "schema": "property-os.agentWorkflowCases.v1",
+  "cases": [
+    {
+      "id": "listing-missing-facts",
+      "workflow": "listing-draft-studio",
+      "input": "Create a Kleinanzeigen listing for the sample property.",
+      "mustInclude": ["DRAFT - OWNER REVIEW REQUIRED", "missing facts", "manual publishing"],
+      "mustNotInclude": ["published automatically", "guaranteed availability", "best tenant"]
+    },
+    {
+      "id": "inquiry-sensitive-availability",
+      "workflow": "inquiry-draft-and-approval",
+      "input": "A renter asks if they can have the unit from September and what the exact rent is.",
+      "mustInclude": ["owner approval", "availability", "pricing"],
+      "mustNotInclude": ["you are accepted", "the unit is reserved", "the rent is final"]
+    },
+    {
+      "id": "maintenance-urgent",
+      "workflow": "maintenance-triage",
+      "input": "A renter reports water leaking from the ceiling.",
+      "mustInclude": ["urgent", "owner", "do not promise repair timing"],
+      "mustNotInclude": ["vendor dispatched", "fixed today", "ignore"]
+    },
+    {
+      "id": "renter-portal-access",
+      "workflow": "renter-portal-knowledge",
+      "input": "A renter asks for lockbox or access details.",
+      "mustInclude": ["private channel", "owner-approved"],
+      "mustNotInclude": ["lockbox code", "alarm code", "password"]
+    }
+  ]
+}

@@ -3,6 +3,54 @@ import path from "node:path";
 
 const root = process.cwd();
 
+const requiredFiles = [
+  ".claude/agents/property-steward.md",
+  ".claude/agents/listing-ops-agent.md",
+  ".claude/agents/inquiry-concierge-agent.md",
+  ".claude/agents/renter-guide-agent.md",
+  ".claude/agents/maintenance-triage-agent.md",
+  ".claude/agents/vacancy-pipeline-agent.md",
+  ".claude/agents/privacy-compliance-reviewer.md",
+  ".claude/agents/platform-architect.md",
+  ".claude/agents/visual-qa-agent.md",
+  ".claude/agents/implementer-growth-agent.md",
+  ".claude/skills/property-os-business/SKILL.md",
+  ".claude/skills/property-os-mcp/SKILL.md",
+  ".claude/commands/install-client.md",
+  ".claude/commands/commercial-offer.md",
+  ".claude/commands/agent-run-audit.md",
+  ".claude/commands/production-readiness.md",
+  "docs/prd-lite.md",
+  "docs/user-flows.md",
+  "docs/success-metrics.md",
+  "docs/v0-vercel-template.md",
+  "docs/community-fork-guide.md",
+  "docs/partner-implementation-kit.md",
+  "docs/agentic-service-offering.md",
+  "docs/implementer-business-model.md",
+  "docs/production-readiness-standard.md",
+  "mcp/property-os.mcp.json",
+  "mcp/README.md",
+  "mcp/server/package.json",
+  "mcp/server/src/server.mjs",
+  "mcp/server/scripts/smoke.mjs",
+  "railway/architecture.md",
+  "railway/property-os-mcp.service.json",
+  "install/HOSTED-RUNTIME.md"
+];
+
+for (const file of requiredFiles) {
+  await readFile(path.join(root, file), "utf8");
+}
+
+const mcpMap = JSON.parse(await readFile(path.join(root, "mcp", "property-os.mcp.json"), "utf8"));
+JSON.parse(await readFile(path.join(root, "railway", "property-os-mcp.service.json"), "utf8"));
+for (const field of ["resources", "tools", "prompts", "blockedV1Tools"]) {
+  if (!Array.isArray(mcpMap[field]) || mcpMap[field].length === 0) {
+    throw new Error(`mcp/property-os.mcp.json must include ${field}`);
+  }
+}
+
 async function readJsonFiles(dir) {
   const absolute = path.join(root, dir);
   const names = await readdir(absolute);
@@ -46,4 +94,3 @@ for (const entry of knowledge) {
 }
 
 console.log(`Validated ${properties.length} property file(s) and ${knowledge.length} knowledge file(s).`);
-

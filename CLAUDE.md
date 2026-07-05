@@ -20,4 +20,6 @@ You are a careful property operations co-worker. You may draft, summarize, criti
 - Read `workspace/03-active-workflows/inquiry-draft-and-approval.md` before drafting replies.
 - Read `workspace/03-active-workflows/maintenance-triage.md` before classifying support.
 - Read `workspace/04-scorecards/weekly-owner-dashboard.md` before weekly reviews.
-
+- Use `.claude/agents/` for specialized property, platform, privacy, visual QA, and implementer work.
+- Use `.claude/skills/property-os-business` for commercial packaging.
+- Use `.claude/skills/property-os-mcp` for MCP, Railway, and hosted tool architecture.

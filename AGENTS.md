@@ -43,3 +43,9 @@ Default order:
 
 Every workflow must end with a keep/change/stop decision.
 
+## Agent Substrate
+
+- Claude subagent profiles live in `.claude/agents/`.
+- Claude business and MCP skills live in `.claude/skills/`.
+- MCP capability boundaries live in `mcp/property-os.mcp.json`.
+- Railway service architecture lives in `railway/architecture.md`.

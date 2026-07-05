@@ -12,7 +12,27 @@
     "vacancy-pipeline",
     "weekly-owner-dashboard"
   ],
+  "agentSubstrate": {
+    "claudeAgents": [
+      "property-steward",
+      "listing-ops-agent",
+      "inquiry-concierge-agent",
+      "renter-guide-agent",
+      "maintenance-triage-agent",
+      "vacancy-pipeline-agent",
+      "privacy-compliance-reviewer",
+      "platform-architect",
+      "visual-qa-agent",
+      "implementer-growth-agent"
+    ],
+    "skills": [
+      "property-os",
+      "property-os-business",
+      "property-os-mcp"
+    ],
+    "mcpCapabilityMap": "mcp/property-os.mcp.json",
+    "railwayArchitecture": "railway/architecture.md"
+  },
   "privacy": "AI drafts and organizes only. Human approval is required for renter-facing outputs and sensitive decisions.",
   "status": "template"
 }
-
