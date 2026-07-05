@@ -10,7 +10,24 @@ Use `property-portal-template` when the owner wants a renter-facing website.
 4. Send only sanitized summaries to GitHub issues.
 5. Verify the Vercel preview before production.
 6. Check `/api/runtime/health` and confirm whether the portal is still in demo mode.
-7. Use `/api/listing-dry-run` for integration payload review before any live publishing work.
+7. Check `/api/runtime/snapshot` and `/admin/runtime` for queue, adapter, notification, and audit posture.
+8. Use `/api/listing-dry-run` for integration payload review before any live publishing work.
+
+## Runtime Adapter
+
+`property-portal-template` starts in `demo-memory` mode and switches to the Postgres adapter when `DATABASE_URL` is set.
+
+Production installs should set:
+
+- `DATABASE_URL`
+- `PROPERTY_OS_ORG_ID`
+- `APP_BASE_URL`
+- `OWNER_NOTIFICATION_EMAIL`
+- optional `OWNER_NOTIFICATION_WEBHOOK_URL`
+- optional `MCP_SERVER_URL`
+- optional `AGENT_RUNTIME_URL`
+
+The portal writes inquiries, support tickets, approvals, agent runs, listing dry-run audit events, and sanitized notification handoffs. Agents and partner reports should use only sanitized summaries outside the runtime database.
 
 ## Do Not Wire Yet
 

@@ -3,6 +3,7 @@
 The Property Intelligence OS has two install surfaces:
 
 - `property-portal-template` exposes `/admin/implementation` and `/api/implementation/readiness`.
+- `property-portal-template` exposes `/admin/runtime` and `/api/runtime/snapshot` for storage, notification, and audit posture.
 - `property-os-template` exposes the MCP prompt/tool pair for implementation readiness review.
 
 Together they let an owner, agency, or implementation partner see whether a fork is only template-ready or ready for a paid production install.
@@ -40,9 +41,10 @@ The portal cockpit should be reviewed after each install milestone:
 2. property facts and images replaced
 3. Vercel preview deployed
 4. database/auth/email configured
-5. owner notification path tested
-6. Codex/Claude/MCP agent workspace paired
-7. first owner weekly review completed
+5. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
+6. owner notification webhook or worker tested with sanitized payload
+7. Codex/Claude/MCP agent workspace paired
+8. first owner weekly review completed
 
 ## Commercial Use
 
@@ -61,6 +63,7 @@ An install is not production-ready because the portal builds. Production readine
 
 - private runtime storage
 - auth and access control
+- runtime snapshot review
 - owner-approved property facts
 - visual QA on the deployed preview
 - notification privacy review

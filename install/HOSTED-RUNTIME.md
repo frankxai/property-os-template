@@ -20,9 +20,13 @@ Portal:
 - `DATABASE_URL`
 - `APP_BASE_URL`
 - `OWNER_NOTIFICATION_EMAIL`
+- `PROPERTY_OS_ORG_ID`
+- `OWNER_NOTIFICATION_WEBHOOK_URL` (optional n8n, Make, Railway, or email-worker bridge)
 - `GITHUB_ISSUE_REPO`
 - `EMAIL_PROVIDER`
 - `OBJECT_STORAGE_PROVIDER`
+- `MCP_SERVER_URL`
+- `AGENT_RUNTIME_URL`
 
 Railway MCP:
 
@@ -36,12 +40,15 @@ Do not commit values. Store them in Vercel or Railway environment settings.
 ## First Production Milestone
 
 1. Keep portal content static and approved.
-2. Turn on runtime database.
-3. Log inquiries, support, approvals, and agent runs.
-4. Deploy MCP server in read-only plus dry-run mode.
-5. Verify owner approval queue.
-6. Run privacy, validation, build, smoke, and visual QA.
-7. Keep listing publication manual.
+2. Apply the portal `db/schema.sql`.
+3. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
+4. Turn on runtime database and verify `/admin/runtime`.
+5. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
+6. Wire sanitized owner notification webhook or worker.
+7. Deploy MCP server in read-only plus dry-run mode.
+8. Verify owner approval queue.
+9. Run privacy, validation, build, smoke, and visual QA.
+10. Keep listing publication manual.
 
 ## Blocked Until Proven
 

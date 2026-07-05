@@ -38,6 +38,7 @@ Use separate environments for development, preview, and production. Agents may r
 - dead-letter handling for failed jobs
 - dry-run mode for listing integrations
 - no secrets in repo files
+- sanitized notification webhooks only; private renter detail remains in Postgres
 
 ## First Railway Milestone
 
@@ -45,4 +46,8 @@ Deploy only `property-os-mcp` with read-only sample resources and dry-run tools.
 
 ## Readiness Milestone
 
-After the portal is deployed, call the portal `/api/implementation/readiness` endpoint and the MCP `create_implementation_readiness_snapshot` tool during every preview handoff. Store only the sanitized readiness summary in client issues or partner reports.
+After the portal is deployed, call the portal `/api/implementation/readiness`, `/api/runtime/snapshot`, and the MCP `create_implementation_readiness_snapshot` tool during every preview handoff. Store only sanitized readiness and runtime summaries in client issues or partner reports.
+
+## Notification Milestone
+
+Point `OWNER_NOTIFICATION_WEBHOOK_URL` at a Railway worker, n8n workflow, Make scenario, or email bridge. The payload must remain sanitized: source id, kind, urgency, route, summary, owner action, and timestamp only.
