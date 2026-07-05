@@ -1,7 +1,7 @@
 {
   "name": "property-os-template",
-  "version": "0.1.0",
-  "releaseDate": "2026-06-30",
+  "version": "0.1.1",
+  "releaseDate": "2026-07-05",
   "purpose": "Public-safe Codex and Claude ready operating workspace for rental property AI workflows.",
   "workflows": [
     "property-profile",
@@ -10,7 +10,8 @@
     "renter-portal-knowledge",
     "maintenance-triage",
     "vacancy-pipeline",
-    "weekly-owner-dashboard"
+    "weekly-owner-dashboard",
+    "implementation-readiness"
   ],
   "agentSubstrate": {
     "claudeAgents": [
