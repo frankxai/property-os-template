@@ -37,7 +37,11 @@ const requiredFiles = [
   "mcp/server/scripts/smoke.mjs",
   "railway/architecture.md",
   "railway/property-os-mcp.service.json",
-  "install/HOSTED-RUNTIME.md"
+  "install/HOSTED-RUNTIME.md",
+  "install/PORTAL-WIRING.md",
+  ".github/ISSUE_TEMPLATE/install-support.md",
+  ".github/ISSUE_TEMPLATE/integration-request.md",
+  ".github/ISSUE_TEMPLATE/safety-review.md"
 ];
 
 for (const file of requiredFiles) {

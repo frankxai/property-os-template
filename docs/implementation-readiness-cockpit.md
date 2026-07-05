@@ -41,10 +41,11 @@ The portal cockpit should be reviewed after each install milestone:
 2. property facts and images replaced
 3. Vercel preview deployed
 4. database/auth/email configured
-5. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
-6. owner notification webhook or worker tested with sanitized payload
-7. Codex/Claude/MCP agent workspace paired
-8. first owner weekly review completed
+5. `db/schema.sql`, `db/rls.sql`, and the owner seed are applied
+6. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
+7. owner notification webhook or worker tested with sanitized payload
+8. Codex/Claude/MCP agent workspace paired
+9. first owner weekly review completed
 
 ## Commercial Use
 
@@ -63,6 +64,7 @@ An install is not production-ready because the portal builds. Production readine
 
 - private runtime storage
 - auth and access control
+- database row-level security
 - runtime snapshot review
 - owner-approved property facts
 - visual QA on the deployed preview

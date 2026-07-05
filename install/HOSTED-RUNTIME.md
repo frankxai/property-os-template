@@ -41,14 +41,15 @@ Do not commit values. Store them in Vercel or Railway environment settings.
 
 1. Keep portal content static and approved.
 2. Apply the portal `db/schema.sql`.
-3. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
-4. Turn on runtime database and verify `/admin/runtime`.
-5. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
-6. Wire sanitized owner notification webhook or worker.
-7. Deploy MCP server in read-only plus dry-run mode.
-8. Verify owner approval queue.
-9. Run privacy, validation, build, smoke, and visual QA.
-10. Keep listing publication manual.
+3. Apply the portal `db/rls.sql`.
+4. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
+5. Turn on runtime database and verify `/admin/runtime`.
+6. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
+7. Wire sanitized owner notification webhook or worker.
+8. Deploy MCP server in read-only plus dry-run mode.
+9. Verify owner approval queue.
+10. Run privacy, validation, build, smoke, and visual QA.
+11. Keep listing publication manual.
 
 ## Blocked Until Proven
 

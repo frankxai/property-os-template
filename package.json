@@ -1,6 +1,6 @@
 {
   "name": "property-os-template",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Codex and Claude ready operating workspace for premium rental property workflows.",
   "license": "MIT",
   "private": true,
