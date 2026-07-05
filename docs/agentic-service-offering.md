@@ -14,6 +14,7 @@ Property OS can become an agentic-as-a-service offering for owners, agencies, an
 - listing draft studio
 - weekly owner review
 - reduced repeated questions
+- implementation readiness report before production handoff
 
 ### Agencies
 
@@ -30,6 +31,7 @@ Property OS can become an agentic-as-a-service offering for owners, agencies, an
 - MCP architecture
 - install runbooks
 - proposal and retainer model
+- portal and MCP readiness checks for every paid install
 
 ## Service Packages
 

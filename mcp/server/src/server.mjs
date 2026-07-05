@@ -21,6 +21,27 @@ const sampleResources = {
   "property://listing-drafts/sample-property": {
     drafts: ["own-website", "kleinanzeigen", "immoscout24", "immowelt"],
     publicationMode: "dry-run-only"
+  },
+  "property://implementation-readiness/sample-org": {
+    posture: "template-ready",
+    portalPath: "/admin/implementation",
+    layers: [
+      "approved property knowledge",
+      "premium renter and owner portal",
+      "secure runtime data layer",
+      "Codex, Claude, and MCP agent substrate",
+      "listing channel operations",
+      "owner notification loop",
+      "community and partner packaging"
+    ],
+    blockedV1Actions: [
+      "publish listing",
+      "send renter message",
+      "dispatch vendor",
+      "approve applicant",
+      "disclose access secret",
+      "change price or availability"
+    ]
   }
 };
 
@@ -96,6 +117,19 @@ const tools = [
         channel: { type: "string" }
       },
       required: ["propertyId", "channel"]
+    }
+  },
+  {
+    name: "create_implementation_readiness_snapshot",
+    description: "Create a partner-safe install readiness summary for owner, agency, or implementer review.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        organizationId: { type: "string" },
+        portalUrl: { type: "string" },
+        runtimeMode: { type: "string" }
+      },
+      required: ["organizationId"]
     }
   }
 ];
@@ -179,6 +213,19 @@ export async function callTool(name, args = {}) {
       sourceId: sanitize(args.sourceId, 120),
       status: "owner-review",
       ownerAction: sanitize(args.ownerAction, 500)
+    });
+  }
+
+  if (name === "create_implementation_readiness_snapshot") {
+    return textContent({
+      status: "PARTNER REVIEW REQUIRED",
+      organizationId: sanitize(args.organizationId, 120),
+      portalUrl: sanitize(args.portalUrl, 240) || "Set APP_BASE_URL and verify /admin/implementation",
+      runtimeMode: sanitize(args.runtimeMode, 80) || "demo",
+      readyLayers: ["premium portal", "manual listing drafts", "owner approval gates", "partner offer ladder"],
+      configureBeforeProduction: ["database", "auth", "notifications", "private client workspace", "monitoring"],
+      blockedActions: capabilityMap.blockedV1Tools,
+      ownerAction: "Approve production gates, support scope, and private-data handling before real renter operations."
     });
   }
 

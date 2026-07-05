@@ -10,6 +10,10 @@ if (!tools.result.tools.some((tool) => tool.name === "run_listing_dry_run")) {
   throw new Error("MCP tools list is missing run_listing_dry_run.");
 }
 
+if (!tools.result.tools.some((tool) => tool.name === "create_implementation_readiness_snapshot")) {
+  throw new Error("MCP tools list is missing create_implementation_readiness_snapshot.");
+}
+
 const draft = await callTool("draft_listing", {
   propertyId: "sample-property",
   channel: "immoscout24"
@@ -23,6 +27,15 @@ const blocked = await callTool("publish_listing", {
 });
 if (!blocked.content[0].text.includes("\"blocked\": true")) {
   throw new Error("publish_listing must be blocked in v1.");
+}
+
+const readiness = await callTool("create_implementation_readiness_snapshot", {
+  organizationId: "sample-org",
+  portalUrl: "https://example.com/admin/implementation",
+  runtimeMode: "demo"
+});
+if (!readiness.content[0].text.includes("PARTNER REVIEW REQUIRED")) {
+  throw new Error("implementation readiness snapshot must require partner review.");
 }
 
 const resource = await handleRequest({

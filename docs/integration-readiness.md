@@ -11,6 +11,7 @@ This template starts as manual-first. Integrations are added only after the owne
 - Renter portal knowledge from approved FAQ records.
 - Inquiry and support intake through the portal template.
 - Sanitized GitHub issue summaries.
+- Implementation readiness snapshots through the portal API and MCP dry-run tool.
 
 ## Dry-Run Next
 
@@ -19,6 +20,7 @@ This template starts as manual-first. Integrations are added only after the owne
 - Resend notification templates.
 - Cal.com viewing request flow.
 - Postgres runtime storage.
+- Hosted readiness worker for agency handoffs.
 
 ## Later
 

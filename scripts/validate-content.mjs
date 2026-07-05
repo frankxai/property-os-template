@@ -26,6 +26,7 @@ const requiredFiles = [
   "docs/v0-vercel-template.md",
   "docs/community-fork-guide.md",
   "docs/partner-implementation-kit.md",
+  "docs/implementation-readiness-cockpit.md",
   "docs/agentic-service-offering.md",
   "docs/implementer-business-model.md",
   "docs/production-readiness-standard.md",

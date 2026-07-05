@@ -12,6 +12,7 @@ The buyer should feel they are buying:
 - owner-controlled AI drafts
 - a professional renter portal
 - a repeatable weekly operating rhythm
+- an implementation readiness cockpit that shows what is live, manual, configured, or blocked
 
 ## Suggested Pricing Logic
 
@@ -31,7 +32,8 @@ Pricing depends on property count, media readiness, custom design, integrations,
 2. Show the premium renter portal and owner dashboard.
 3. Run a 45-minute owner intake.
 4. Produce the first property page and listing drafts.
-5. Sell monthly operations once repeated admin is visible.
+5. Review `/admin/implementation` with the owner so production gaps are explicit.
+6. Sell monthly operations once repeated admin is visible.
 
 ## Proof Assets
 
@@ -42,6 +44,7 @@ Pricing depends on property count, media readiness, custom design, integrations,
 - mobile portal screenshots
 - manual publication checklist
 - privacy scan and release gate evidence
+- readiness score, blocked-action list, and MCP readiness snapshot
 
 ## Partner Rules
 

@@ -13,6 +13,7 @@ Help owners and agencies launch a cleaner, safer, more premium property operatin
 - listing draft studio
 - support and inquiry workflows
 - visual QA
+- implementation readiness cockpit
 - owner training
 - managed operations proposal
 
@@ -49,6 +50,7 @@ Do not promise:
 - validation output
 - privacy scan output
 - portal preview
+- `/admin/implementation` readiness score and MCP readiness snapshot
 - visual QA notes
 - first listing drafts
 - weekly review checklist

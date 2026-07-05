@@ -8,7 +8,8 @@
     "property://knowledge/{propertyId}",
     "property://listing-drafts/{propertyId}",
     "property://agent-runs/{organizationId}",
-    "property://approvals/{organizationId}"
+    "property://approvals/{organizationId}",
+    "property://implementation-readiness/{organizationId}"
   ],
   "tools": [
     "create_inquiry_summary",
@@ -18,13 +19,15 @@
     "request_owner_approval",
     "create_sanitized_github_issue",
     "run_privacy_scan",
-    "run_listing_dry_run"
+    "run_listing_dry_run",
+    "create_implementation_readiness_snapshot"
   ],
   "prompts": [
     "weekly_owner_review",
     "listing_missing_facts",
     "maintenance_triage",
     "integration_dry_run_review",
+    "implementation_readiness_review",
     "commercial_offer"
   ],
   "blockedV1Tools": [

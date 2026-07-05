@@ -38,6 +38,7 @@ npm run mcp:smoke
 - Hosted MCP/worker plan: `railway/architecture.md`.
 - Vercel/v0 implementation brief: `docs/v0-vercel-template.md`.
 - Partner offer and handoff: `docs/partner-implementation-kit.md`.
+- Implementation readiness cockpit: `docs/implementation-readiness-cockpit.md`.
 - Template readiness checklist: `TEMPLATE_READINESS.md`.
 
 ## Included
@@ -61,6 +62,7 @@ npm run mcp:smoke
 - `docs/v0-vercel-template.md`: v0 prompt and Vercel template expectations.
 - `docs/community-fork-guide.md`: free/community fork rules.
 - `docs/partner-implementation-kit.md`: partner offer, deliverables, sales script, and handoff proof.
+- `docs/implementation-readiness-cockpit.md`: portal plus MCP readiness workflow for paid installs and agency delivery.
 - `docs/agentic-service-offering.md`: agentic-as-a-service packaging.
 - `docs/implementer-business-model.md`: how agencies and technical partners can earn with the template.
 - `docs/production-readiness-standard.md`: security, performance, reliability, deployment, and agent governance gates.

@@ -23,6 +23,7 @@ Keep the public portal on Vercel unless the repo is intentionally moved.
 | property-os-mcp | Railway Node/TS | MCP resources, tools, prompts |
 | queue-worker | Railway Node/TS | weekly digest, retry, dry-run integration jobs |
 | notification-worker | Railway Node/TS | email and optional messaging notifications |
+| readiness-worker | Railway Node/TS | scheduled implementation readiness snapshots and partner handoff checks |
 
 ## Environment Boundary
 
@@ -41,3 +42,7 @@ Use separate environments for development, preview, and production. Agents may r
 ## First Railway Milestone
 
 Deploy only `property-os-mcp` with read-only sample resources and dry-run tools. Add write tools after auth, audit, and owner approval are proven.
+
+## Readiness Milestone
+
+After the portal is deployed, call the portal `/api/implementation/readiness` endpoint and the MCP `create_implementation_readiness_snapshot` tool during every preview handoff. Store only the sanitized readiness summary in client issues or partner reports.
