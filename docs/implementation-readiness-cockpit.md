@@ -40,12 +40,14 @@ The portal cockpit should be reviewed after each install milestone:
 1. free fork created
 2. property facts and images replaced
 3. Vercel preview deployed
-4. database/auth/email configured
+4. owner passcode auth configured with `OWNER_PORTAL_SECRET`, `OWNER_PORTAL_PASSCODE_HASH`, `PROPERTY_OS_DEMO_AUTH=false`, and optional `OWNER_PORTAL_API_TOKEN`
 5. `db/schema.sql`, `db/rls.sql`, and the owner seed are applied
-6. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
-7. owner notification webhook or worker tested with sanitized payload
-8. Codex/Claude/MCP agent workspace paired
-9. first owner weekly review completed
+6. `npm run auth:smoke` proves owner/admin route protection and protected owner API behavior
+7. `npm run db:rls:smoke` proves live Postgres tenant isolation for `PROPERTY_OS_ORG_ID`
+8. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
+9. owner notification webhook or worker tested with sanitized payload
+10. Codex/Claude/MCP agent workspace paired
+11. first owner weekly review completed
 
 ## Commercial Use
 
@@ -65,6 +67,8 @@ An install is not production-ready because the portal builds. Production readine
 - private runtime storage
 - auth and access control
 - database row-level security
+- owner passcode auth smoke
+- live database RLS smoke
 - runtime snapshot review
 - owner-approved property facts
 - visual QA on the deployed preview

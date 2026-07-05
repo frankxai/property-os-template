@@ -1,6 +1,6 @@
 {
   "name": "property-os-template",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "releaseDate": "2026-07-05",
   "purpose": "Public-safe Codex and Claude ready operating workspace for rental property AI workflows.",
   "workflows": [

@@ -21,6 +21,10 @@ Portal:
 - `APP_BASE_URL`
 - `OWNER_NOTIFICATION_EMAIL`
 - `PROPERTY_OS_ORG_ID`
+- `PROPERTY_OS_DEMO_AUTH`
+- `OWNER_PORTAL_SECRET`
+- `OWNER_PORTAL_PASSCODE_HASH`
+- `OWNER_PORTAL_API_TOKEN` (optional automation bearer for protected owner APIs)
 - `OWNER_NOTIFICATION_WEBHOOK_URL` (optional n8n, Make, Railway, or email-worker bridge)
 - `GITHUB_ISSUE_REPO`
 - `EMAIL_PROVIDER`
@@ -37,19 +41,23 @@ Railway MCP:
 
 Do not commit values. Store them in Vercel or Railway environment settings.
 
+Create the owner passcode materials inside the portal repo with `npm run auth:hash -- "private owner passcode"`. Store the generated `OWNER_PORTAL_SECRET` and `OWNER_PORTAL_PASSCODE_HASH` in the host; never commit the passcode or generated values.
+
 ## First Production Milestone
 
 1. Keep portal content static and approved.
-2. Apply the portal `db/schema.sql`.
-3. Apply the portal `db/rls.sql`.
-4. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
-5. Turn on runtime database and verify `/admin/runtime`.
-6. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
-7. Wire sanitized owner notification webhook or worker.
-8. Deploy MCP server in read-only plus dry-run mode.
-9. Verify owner approval queue.
-10. Run privacy, validation, build, smoke, and visual QA.
-11. Keep listing publication manual.
+2. Configure owner passcode auth and run `npm run auth:smoke`.
+3. Apply the portal `db/schema.sql`.
+4. Apply the portal `db/rls.sql`.
+5. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
+6. Run `npm run db:rls:smoke` against the live database.
+7. Turn on runtime database and verify `/admin/runtime`.
+8. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
+9. Wire sanitized owner notification webhook or worker.
+10. Deploy MCP server in read-only plus dry-run mode.
+11. Verify owner approval queue.
+12. Run privacy, validation, build, smoke, auth smoke, RLS smoke, and visual QA.
+13. Keep listing publication manual.
 
 ## Blocked Until Proven
 

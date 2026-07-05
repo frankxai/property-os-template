@@ -48,6 +48,51 @@ for (const file of requiredFiles) {
   await readFile(path.join(root, file), "utf8");
 }
 
+const requiredSnippetChecks = [
+  {
+    file: "install/PORTAL-WIRING.md",
+    snippets: [
+      "OWNER_PORTAL_SECRET",
+      "OWNER_PORTAL_PASSCODE_HASH",
+      "OWNER_PORTAL_API_TOKEN",
+      "PROPERTY_OS_DEMO_AUTH",
+      "npm run auth:hash",
+      "npm run auth:smoke",
+      "npm run db:rls:smoke",
+      "Protected owner/admin API calls"
+    ]
+  },
+  {
+    file: "install/HOSTED-RUNTIME.md",
+    snippets: [
+      "OWNER_PORTAL_SECRET",
+      "OWNER_PORTAL_PASSCODE_HASH",
+      "OWNER_PORTAL_API_TOKEN",
+      "npm run auth:hash",
+      "npm run auth:smoke",
+      "npm run db:rls:smoke"
+    ]
+  },
+  {
+    file: "docs/implementation-readiness-cockpit.md",
+    snippets: [
+      "owner passcode auth",
+      "npm run auth:smoke",
+      "npm run db:rls:smoke",
+      "live database RLS smoke"
+    ]
+  }
+];
+
+for (const check of requiredSnippetChecks) {
+  const raw = await readFile(path.join(root, check.file), "utf8");
+  for (const snippet of check.snippets) {
+    if (!raw.includes(snippet)) {
+      throw new Error(`${check.file} must include ${snippet}`);
+    }
+  }
+}
+
 const mcpMap = JSON.parse(await readFile(path.join(root, "mcp", "property-os.mcp.json"), "utf8"));
 JSON.parse(await readFile(path.join(root, "railway", "property-os-mcp.service.json"), "utf8"));
 for (const field of ["resources", "tools", "prompts", "blockedV1Tools"]) {
