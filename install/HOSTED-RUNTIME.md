@@ -43,6 +43,8 @@ Do not commit values. Store them in Vercel or Railway environment settings.
 
 Create the owner passcode materials inside the portal repo with `npm run auth:hash -- "private owner passcode"`. Store the generated `OWNER_PORTAL_SECRET` and `OWNER_PORTAL_PASSCODE_HASH` in the host; never commit the passcode or generated values.
 
+Before owner handoff, run `npm run install:proof` in the portal repo and review `/api/install/proof-packet` through an owner session or trusted `OWNER_PORTAL_API_TOKEN`. The proof packet reports key names and configured booleans only; it does not print secret values.
+
 ## First Production Milestone
 
 1. Keep portal content static and approved.
@@ -51,13 +53,14 @@ Create the owner passcode materials inside the portal repo with `npm run auth:ha
 4. Apply the portal `db/rls.sql`.
 5. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
 6. Run `npm run db:rls:smoke` against the live database.
-7. Turn on runtime database and verify `/admin/runtime`.
-8. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
-9. Wire sanitized owner notification webhook or worker.
-10. Deploy MCP server in read-only plus dry-run mode.
-11. Verify owner approval queue.
-12. Run privacy, validation, build, smoke, auth smoke, RLS smoke, and visual QA.
-13. Keep listing publication manual.
+7. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
+8. Turn on runtime database and verify `/admin/runtime`.
+9. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
+10. Wire sanitized owner notification webhook or worker.
+11. Deploy MCP server in read-only plus dry-run mode.
+12. Verify owner approval queue.
+13. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, and visual QA.
+14. Keep listing publication manual.
 
 ## Blocked Until Proven
 

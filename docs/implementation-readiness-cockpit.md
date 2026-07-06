@@ -4,6 +4,7 @@ The Property Intelligence OS has two install surfaces:
 
 - `property-portal-template` exposes `/admin/implementation` and `/api/implementation/readiness`.
 - `property-portal-template` exposes `/admin/runtime` and `/api/runtime/snapshot` for storage, notification, and audit posture.
+- `property-portal-template` v0.1.5 exposes `/admin/setup`, `/api/install/proof-packet`, and `npm run install:proof` for owner and partner handoff proof.
 - `property-os-template` exposes the MCP prompt/tool pair for implementation readiness review.
 
 Together they let an owner, agency, or implementation partner see whether a fork is only template-ready or ready for a paid production install.
@@ -41,13 +42,15 @@ The portal cockpit should be reviewed after each install milestone:
 2. property facts and images replaced
 3. Vercel preview deployed
 4. owner passcode auth configured with `OWNER_PORTAL_SECRET`, `OWNER_PORTAL_PASSCODE_HASH`, `PROPERTY_OS_DEMO_AUTH=false`, and optional `OWNER_PORTAL_API_TOKEN`
-5. `db/schema.sql`, `db/rls.sql`, and the owner seed are applied
-6. `npm run auth:smoke` proves owner/admin route protection and protected owner API behavior
-7. `npm run db:rls:smoke` proves live Postgres tenant isolation for `PROPERTY_OS_ORG_ID`
-8. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
-9. owner notification webhook or worker tested with sanitized payload
-10. Codex/Claude/MCP agent workspace paired
-11. first owner weekly review completed
+5. `npm run auth:smoke` proves owner/admin route protection and protected owner API behavior
+6. `npm run install:proof` exports the public-safe install proof packet
+7. `/api/install/proof-packet` and `/admin/setup` confirm proof score, command checks, missing environment names, owner approval gates, and blocked v1 actions
+8. `db/schema.sql`, `db/rls.sql`, and the owner seed are applied
+9. `npm run db:rls:smoke` proves live Postgres tenant isolation for `PROPERTY_OS_ORG_ID`
+10. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
+11. owner notification webhook or worker tested with sanitized payload
+12. Codex/Claude/MCP agent workspace paired
+13. first owner weekly review completed
 
 ## Commercial Use
 
@@ -68,6 +71,7 @@ An install is not production-ready because the portal builds. Production readine
 - auth and access control
 - database row-level security
 - owner passcode auth smoke
+- install proof packet from `/api/install/proof-packet`
 - live database RLS smoke
 - runtime snapshot review
 - owner-approved property facts

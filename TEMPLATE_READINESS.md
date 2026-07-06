@@ -38,6 +38,7 @@ Install an approved-facts property workspace that supports listing drafts, inqui
 - monitoring and incident process
 - legal/compliance review for local rental market
 - approved property photos and exact address publication policy
+- portal install proof packet exported with `npm run install:proof` and reviewed through `/api/install/proof-packet`
 
 ## Publish Action
 

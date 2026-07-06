@@ -59,6 +59,8 @@ const requiredSnippetChecks = [
       "npm run auth:hash",
       "npm run auth:smoke",
       "npm run db:rls:smoke",
+      "npm run install:proof",
+      "/api/install/proof-packet",
       "Protected owner/admin API calls"
     ]
   },
@@ -70,7 +72,9 @@ const requiredSnippetChecks = [
       "OWNER_PORTAL_API_TOKEN",
       "npm run auth:hash",
       "npm run auth:smoke",
-      "npm run db:rls:smoke"
+      "npm run db:rls:smoke",
+      "npm run install:proof",
+      "/api/install/proof-packet"
     ]
   },
   {
@@ -78,6 +82,8 @@ const requiredSnippetChecks = [
     snippets: [
       "owner passcode auth",
       "npm run auth:smoke",
+      "npm run install:proof",
+      "/api/install/proof-packet",
       "npm run db:rls:smoke",
       "live database RLS smoke"
     ]

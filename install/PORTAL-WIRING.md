@@ -11,9 +11,11 @@ Use `property-portal-template` when the owner wants a renter-facing website.
 5. Send only sanitized summaries to GitHub issues.
 6. Verify the Vercel preview before production.
 7. Run `npm run auth:smoke` so owner/admin routes and protected APIs prove the auth boundary.
-8. Check `/api/runtime/health` and confirm whether the portal is still in demo mode.
-9. Check `/api/runtime/snapshot` and `/admin/runtime` for queue, adapter, notification, and audit posture.
-10. Use `/api/listing-dry-run` for integration payload review before any live publishing work.
+8. Run `npm run install:proof` so the install proof packet records the current phase gates without printing secret values.
+9. Check `/api/install/proof-packet` and `/admin/setup` for proof score, command checks, missing environment names, owner approvals, and blocked v1 actions.
+10. Check `/api/runtime/health` and confirm whether the portal is still in demo mode.
+11. Check `/api/runtime/snapshot` and `/admin/runtime` for queue, adapter, notification, and audit posture.
+12. Use `/api/listing-dry-run` for integration payload review before any live publishing work.
 
 ## Runtime Adapter
 
@@ -44,7 +46,8 @@ Production database install order:
 3. Seed `db/seed-sample.sql` for local smoke or a private owner seed for the real install.
 4. Set `PROPERTY_OS_ORG_ID` to the seeded organization.
 5. Run `npm run db:rls:smoke` against the live `DATABASE_URL`.
-6. Check `/api/runtime/snapshot` and `/admin/runtime`.
+6. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
+7. Check `/api/install/proof-packet`, `/api/runtime/snapshot`, `/admin/setup`, and `/admin/runtime`.
 
 The portal issue templates include install support, integration requests, safety review, and portal QA. Use them as the public-safe support layer for community forks and partner installs.
 

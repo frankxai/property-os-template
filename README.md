@@ -39,6 +39,7 @@ npm run mcp:smoke
 - Vercel/v0 implementation brief: `docs/v0-vercel-template.md`.
 - Partner offer and handoff: `docs/partner-implementation-kit.md`.
 - Implementation readiness cockpit: `docs/implementation-readiness-cockpit.md`.
+- Portal install proof packet: `property-portal-template` v0.1.5 exposes `/admin/setup`, `/api/install/proof-packet`, and `npm run install:proof`.
 - Template readiness checklist: `TEMPLATE_READINESS.md`.
 
 ## Included

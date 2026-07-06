@@ -14,6 +14,7 @@
 ### Performance
 
 - portal builds successfully
+- portal install proof packet passes with `npm run install:proof`
 - first load stays lightweight
 - images are rights-approved and optimized
 - admin routes remain usable on mobile
@@ -38,6 +39,7 @@
 ### Deployment
 
 - Vercel preview for portal
+- `/admin/setup` and `/api/install/proof-packet` reviewed before owner handoff
 - Railway only for always-on MCP, workers, or integration services
 - database migration plan
 - environment separation
@@ -53,4 +55,5 @@ An install is ready for paid usage when:
 - listing drafts are channel-ready
 - no private data appears in public artifacts
 - validation, privacy, typecheck, build, smoke, and visual QA pass
+- install proof packet, auth smoke, and live RLS smoke pass for the target install
 - at least one weekly review loop has been run
