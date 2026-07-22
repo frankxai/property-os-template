@@ -6,7 +6,7 @@
 
 Cloneable Codex/Claude-ready operating workspace for a landlord, property owner, or small property group.
 
-This is not a property management suite. It is a private operating layer for approved property facts, renter knowledge, listing drafts, inquiry support, maintenance triage, and weekly owner review.
+This is not a property management suite. It is an owner-controlled operating layer for approved property facts, renter knowledge, listing drafts, inquiry support, maintenance triage, agent missions, and weekly review.
 
 ## Who This Is For
 
@@ -31,6 +31,8 @@ npm run validate
 npm run mcp:smoke
 ```
 
+For the hosted control plane, run `npm run mcp:http`. The local stdio and hosted Streamable HTTP transports expose the same typed resources, prompts, tools, authority policy, and controlled-transition proof.
+
 ## Publish-Ready Paths
 
 - Forkable GitHub workspace: this repo.
@@ -39,8 +41,9 @@ npm run mcp:smoke
 - Vercel/v0 implementation brief: `docs/v0-vercel-template.md`.
 - Partner offer and handoff: `docs/partner-implementation-kit.md`.
 - Implementation readiness cockpit: `docs/implementation-readiness-cockpit.md`.
-- Portal install proof packet: `property-portal-template` v0.1.5 exposes `/admin/setup`, `/api/install/proof-packet`, and `npm run install:proof`.
+- Portal install proof packet: `property-portal-template` v0.2.0 exposes `/admin/setup`, `/admin/control-center`, `/api/install/proof-packet`, `/api/agent-missions`, and `npm run install:proof`.
 - Template readiness checklist: `TEMPLATE_READINESS.md`.
+- Product editions and partner economics: `docs/product-editions-and-economics.md`.
 
 ## Included
 
@@ -52,7 +55,9 @@ npm run mcp:smoke
 - `.claude/skills`: business and MCP skills for commercial packaging and hosted agent architecture.
 - `.claude/commands`: Claude workflow prompts.
 - `mcp/`: MCP capability map and tool boundary.
-- `mcp/server/`: runnable dependency-free MCP server skeleton for dry-run tools.
+- `mcp/server/`: official MCP SDK server for stdio and authenticated Streamable HTTP tools.
+- `agents/team.manifest.json`: machine-readable specialist mandates, authority, proof, and handoffs.
+- `.swarm/property-os.yml`: bounded swarm topology for Codex/Claude-compatible orchestration.
 - `railway/`: hosted MCP/worker deployment architecture.
 - `workspace/`: owner context, data boundaries, workflows, scorecards, proof notes.
 - `workspace/06-runbooks/`: first 30 days, listing publication, renter support, and portal release gates.
@@ -67,6 +72,8 @@ npm run mcp:smoke
 - `docs/agentic-service-offering.md`: agentic-as-a-service packaging.
 - `docs/implementer-business-model.md`: how agencies and technical partners can earn with the template.
 - `docs/production-readiness-standard.md`: security, performance, reliability, deployment, and agent governance gates.
+- `docs/ai-architecture-and-control-plane.md`: provider-neutral model routing, MCP deployment, receipts, and failure boundaries.
+- `docs/product-editions-and-economics.md`: community, partner, managed-service, and agency product boundary.
 - `docs/integration-readiness.md`: manual-first and API-later integration gates.
 - `evals/agent-workflow-cases.json`: blocked-output expectations for agent workflows.
 - `templates/`: copyable intake, listing, FAQ, maintenance, and weekly review templates.
@@ -78,7 +85,7 @@ npm run mcp:smoke
 
 ## V1 Rule
 
-The system drafts and organizes. A human approves anything renter-facing, price-related, legal, availability-related, urgent, or private.
+The system observes, drafts, reviews, and records evidence. A human approves anything renter-facing, price-related, legal, availability-related, urgent, or private. Approval alone never causes an external action.
 
 ## Support Boundary
 

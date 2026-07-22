@@ -42,7 +42,22 @@ Use separate environments for development, preview, and production. Agents may r
 
 ## First Railway Milestone
 
-Deploy only `property-os-mcp` with read-only sample resources and dry-run tools. Add write tools after auth, audit, and owner approval are proven.
+Deploy `mcp/server` with its Dockerfile and `/readyz` health check. Start with one private pilot tenant, a generated bearer token, allowed host/origin policy, read resources, mission tools, dry runs, and the internal controlled-transition proof. External actions remain blocked.
+
+## Production Auth Milestone
+
+Move from static bearer to OIDC mode before agency or marketplace use. Configure issuer, audience, JWKS URL, tenant claim, role claim, scopes, and allowed tenants. The public MCP service is a resource server; identity and authorization policy are not delegated to caller headers.
+
+## Railway Template Gate
+
+- root directory `mcp/server`
+- Dockerfile build
+- health check `/readyz`
+- generated secrets, never defaults
+- private Postgres hostname for future repository adapter
+- one public domain for `/mcp`
+- separate development, preview, and production environments
+- deployment support and update policy documented before Marketplace publication
 
 ## Readiness Milestone
 

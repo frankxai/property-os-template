@@ -30,11 +30,23 @@ const requiredFiles = [
   "docs/agentic-service-offering.md",
   "docs/implementer-business-model.md",
   "docs/production-readiness-standard.md",
+  "docs/ai-architecture-and-control-plane.md",
+  "docs/product-editions-and-economics.md",
+  "agents/team.manifest.json",
+  ".swarm/property-os.yml",
   "mcp/property-os.mcp.json",
   "mcp/README.md",
   "mcp/server/package.json",
   "mcp/server/src/server.mjs",
+  "mcp/server/src/server-factory.mjs",
+  "mcp/server/src/domain.mjs",
+  "mcp/server/src/auth.mjs",
+  "mcp/server/src/http.mjs",
   "mcp/server/scripts/smoke.mjs",
+  "mcp/server/scripts/adversarial.mjs",
+  "mcp/server/scripts/http-smoke.mjs",
+  "mcp/server/Dockerfile",
+  "mcp/server/railway.toml",
   "railway/architecture.md",
   "railway/property-os-mcp.service.json",
   "install/HOSTED-RUNTIME.md",
@@ -104,6 +116,22 @@ JSON.parse(await readFile(path.join(root, "railway", "property-os-mcp.service.js
 for (const field of ["resources", "tools", "prompts", "blockedV1Tools"]) {
   if (!Array.isArray(mcpMap[field]) || mcpMap[field].length === 0) {
     throw new Error(`mcp/property-os.mcp.json must include ${field}`);
+  }
+}
+
+if (mcpMap.version !== "0.2.0" || !mcpMap.security?.controlledTransitions) {
+  throw new Error("mcp/property-os.mcp.json must expose the v0.2 controlled-transition security contract");
+}
+
+const teamManifest = JSON.parse(await readFile(path.join(root, "agents", "team.manifest.json"), "utf8"));
+if (!Array.isArray(teamManifest.profiles) || teamManifest.profiles.length < 10) {
+  throw new Error("agents/team.manifest.json must include the full specialist team");
+}
+
+const swarmContract = await readFile(path.join(root, ".swarm", "property-os.yml"), "utf8");
+for (const snippet of ["max_parallel_agents: 4", "authority", "compliance-reviewer", "visual-qa"]) {
+  if (!swarmContract.includes(snippet)) {
+    throw new Error(`.swarm/property-os.yml must include ${snippet}`);
   }
 }
 

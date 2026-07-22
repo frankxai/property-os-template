@@ -36,3 +36,18 @@ The community version should stay useful without paid services:
 - manual listing workflow
 - docs and templates
 - validation scripts
+- official-SDK local MCP server, authority tests, and hosted deployment contract
+- agent and skill packs for Codex and Claude
+- owner control-center source and sample mission workflow in the paired portal
+
+Safety is not a premium feature. Privacy boundaries, blocked actions, authority tests, schemas, and release checks remain in the community edition.
+
+## Fork-to-Proof Path
+
+1. Fork `property-os-template` and `property-portal-template`.
+2. Keep sample data until `npm run validate` and the full MCP test suite pass.
+3. Deploy the portal as a Vercel preview; deploy MCP to Railway only when hosted auth is configured.
+4. Complete the sample install proof before adding real owner or renter data.
+5. Put client facts in a private install repo, never in a public fork.
+
+Community support is documentation and issue-driven. It does not include production operations, incident response, legal review, custom integrations, uptime, or data-controller responsibility.

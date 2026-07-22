@@ -1,0 +1,24 @@
+version: 1
+topology: hierarchical
+orchestrator: property-steward
+max_parallel_agents: 4
+machine_gate: pp-preflight-required
+lanes:
+  property_truth:
+    agents: [property-steward, compliance-reviewer]
+    writes: [data/properties, data/knowledge, workspace]
+  renter_operations:
+    agents: [inquiry-concierge, renter-guide, maintenance-triage]
+    writes: [workspace/03-active-workflows, workspace/05-queues]
+  revenue_operations:
+    agents: [listing-ops, vacancy-pipeline, renovation-planner]
+    writes: [data/listings, workspace/04-scorecards]
+  release:
+    agents: [implementation-lead, visual-qa, compliance-reviewer]
+    writes: [docs, install, evals]
+handoff:
+  required: [inputs_used, artifact, evidence, risk, owner_action, keep_change_stop]
+authority:
+  draft_without_owner: true
+  external_actions_without_owner: false
+  controlled_internal_apply: server-issued-single-use-receipt

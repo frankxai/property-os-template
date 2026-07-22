@@ -1,26 +1,22 @@
 # MCP Architecture
 
-Property OS should expose one MCP layer for agents and implementers once runtime storage exists.
+Property OS exposes one governed interoperability layer for Codex, Claude, partner tools, and hosted agents.
 
-## Server Roles
+## Capability Split
 
-- Property context server: approved facts, units, FAQs, listing drafts.
-- Operations server: sanitized inquiries, support tickets, approvals, agent runs.
-- Integration server: dry-run payloads for EstateSync, ImmoScout24, email, calendar, and future channels.
-- Implementation readiness server: partner-safe install audits, blocked-action summaries, and handoff checks.
+- Resources: approved sample facts, authority contract, agent team, success metrics, readiness.
+- Prompts: owner review, listing gaps, maintenance, implementation, commercial offer, mission and transition review.
+- Draft tools: missions, inquiry/support summaries, listings, replies, privacy scan, sanitized issues.
+- Decision tools: proposal and owner decision are separate.
+- Apply tool: consumes one server-issued receipt for one internal proof transition.
+- External tools: publication, messaging, dispatch, applicant selection, access disclosure, pricing, and availability remain blocked.
 
-## Deployment
+## Deployments
 
-- Local stdio MCP is best for private owner workspaces and implementer development.
-- Streamable HTTP MCP is best for hosted SaaS, agency mode, and Railway-hosted services.
-- Railway is appropriate for always-on MCP servers, queue workers, sync workers, and integration dry-run services.
+- `stdio` is the default for a private owner workspace.
+- Streamable HTTP is the hosted route for Vercel integrations, agency services, and Railway.
+- Static bearer mode supports one private pilot tenant.
+- OIDC JWT mode is required for multi-tenant production.
+- Portal APIs remain the source for interactive owner decisions and high-frequency product state.
 
-## V1 Tool Boundary
-
-Allowed tools draft, summarize, validate, request approval, and create sanitized issues.
-
-Blocked tools publish listings, send renter messages, dispatch vendors, approve applicants, disclose access secrets, or change pricing/availability.
-
-Use `create_implementation_readiness_snapshot` before a paid install is handed to an owner or agency. It should summarize what is ready, what still needs runtime configuration, and which actions remain blocked by the v1 safety model.
-
-See `property-os.mcp.json` for the machine-readable capability map.
+Run `npm --prefix mcp/server test` before every release. See `docs/ai-architecture-and-control-plane.md` and `mcp/property-os.mcp.json`.

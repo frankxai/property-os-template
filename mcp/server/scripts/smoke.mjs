@@ -1,51 +1,34 @@
-import { callTool, handleRequest } from "../src/server.mjs";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { createPropertyOsEngine } from "../src/domain.mjs";
+import { createPropertyOsServer } from "../src/server-factory.mjs";
 
-const initialized = await handleRequest({ jsonrpc: "2.0", id: 1, method: "initialize" });
-if (initialized.result?.serverInfo?.name !== "property-os") {
-  throw new Error("MCP initialize did not return property-os server info.");
+const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+const { server } = createPropertyOsServer({ engine: createPropertyOsEngine() });
+const client = new Client({ name: "property-os-smoke", version: "0.2.0" });
+
+await server.connect(serverTransport);
+await client.connect(clientTransport);
+
+const serverVersion = client.getServerVersion();
+if (serverVersion?.name !== "property-os" || serverVersion?.version !== "0.2.0") {
+  throw new Error("MCP initialization did not return Property OS v0.2.0.");
 }
 
-const tools = await handleRequest({ jsonrpc: "2.0", id: 2, method: "tools/list" });
-if (!tools.result.tools.some((tool) => tool.name === "run_listing_dry_run")) {
-  throw new Error("MCP tools list is missing run_listing_dry_run.");
+const listedTools = await client.listTools();
+for (const required of ["create_agent_mission", "run_listing_dry_run", "propose_controlled_transition", "record_owner_decision", "apply_approved_transition"]) {
+  if (!listedTools.tools.some((tool) => tool.name === required)) throw new Error(`MCP tools list is missing ${required}.`);
 }
 
-if (!tools.result.tools.some((tool) => tool.name === "create_implementation_readiness_snapshot")) {
-  throw new Error("MCP tools list is missing create_implementation_readiness_snapshot.");
-}
+const draft = await client.callTool({ name: "draft_listing", arguments: { propertyId: "sample-property", channel: "immoscout24" } });
+if (!draft.content[0]?.text?.includes("OWNER REVIEW REQUIRED")) throw new Error("Listing drafts must require owner review.");
 
-const draft = await callTool("draft_listing", {
-  propertyId: "sample-property",
-  channel: "immoscout24"
-});
-if (!draft.content[0].text.includes("OWNER REVIEW REQUIRED")) {
-  throw new Error("draft_listing must require owner review.");
-}
+const resource = await client.readResource({ uri: "property://contracts/authority" });
+if (!resource.contents[0]?.text?.includes("property-os-authority.v2")) throw new Error("Authority contract resource is missing.");
 
-const blocked = await callTool("publish_listing", {
-  propertyId: "sample-property"
-});
-if (!blocked.content[0].text.includes("\"blocked\": true")) {
-  throw new Error("publish_listing must be blocked in v1.");
-}
+const prompt = await client.getPrompt({ name: "controlled_transition_review", arguments: { organizationId: "sample-org" } });
+if (!prompt.messages[0]?.content?.text?.includes("Do not apply or publish external actions")) throw new Error("Governed prompt boundary is missing.");
 
-const readiness = await callTool("create_implementation_readiness_snapshot", {
-  organizationId: "sample-org",
-  portalUrl: "https://example.com/admin/implementation",
-  runtimeMode: "demo"
-});
-if (!readiness.content[0].text.includes("PARTNER REVIEW REQUIRED")) {
-  throw new Error("implementation readiness snapshot must require partner review.");
-}
-
-const resource = await handleRequest({
-  jsonrpc: "2.0",
-  id: 3,
-  method: "resources/read",
-  params: { uri: "property://profile/sample-property" }
-});
-if (!resource.result.contents[0].text.includes("Sample Property")) {
-  throw new Error("MCP resource read failed.");
-}
-
-console.log("Property OS MCP smoke passed.");
+await client.close();
+await server.close();
+console.log("Property OS SDK MCP smoke passed.");

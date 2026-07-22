@@ -1,0 +1,27 @@
+{
+  "schema": "property-os.agentTeam.v1",
+  "version": "0.2.0",
+  "topology": "owner-led-hierarchical",
+  "orchestrator": "property-steward",
+  "sharedExitGate": "evidence + risk + owner action + keep/change/stop",
+  "profiles": [
+    { "id": "property-steward", "claude": ".claude/agents/property-steward.md", "scope": ["property-truth", "mission-routing", "weekly-review"] },
+    { "id": "listing-ops", "claude": ".claude/agents/listing-ops-agent.md", "scope": ["listing-drafts", "missing-facts", "channel-dry-run"] },
+    { "id": "inquiry-concierge", "claude": ".claude/agents/inquiry-concierge-agent.md", "scope": ["inquiry-summary", "reply-draft"] },
+    { "id": "renter-guide", "claude": ".claude/agents/renter-guide-agent.md", "scope": ["approved-knowledge", "self-service-coverage"] },
+    { "id": "maintenance-triage", "claude": ".claude/agents/maintenance-triage-agent.md", "scope": ["urgency", "evidence-request", "owner-route"] },
+    { "id": "vacancy-pipeline", "claude": ".claude/agents/vacancy-pipeline-agent.md", "scope": ["renewal-interest", "vacancy-lead-time", "listing-readiness"] },
+    { "id": "renovation-planner", "claude": ".claude/agents/platform-architect.md", "scope": ["renovation-options", "dependencies", "budget-gate"] },
+    { "id": "compliance-reviewer", "claude": ".claude/agents/privacy-compliance-reviewer.md", "scope": ["privacy", "legal-boundary", "selection-risk", "claims"] },
+    { "id": "visual-qa", "claude": ".claude/agents/visual-qa-agent.md", "scope": ["desktop", "mobile", "accessibility", "premium-score"] },
+    { "id": "implementation-lead", "claude": ".claude/agents/implementer-growth-agent.md", "scope": ["install-proof", "production-gates", "partner-handoff"] }
+  ],
+  "blockedActions": [
+    "publish_listing",
+    "send_renter_message",
+    "dispatch_vendor",
+    "approve_applicant",
+    "disclose_access_secret",
+    "change_price_or_availability"
+  ]
+}

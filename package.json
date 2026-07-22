@@ -1,6 +1,6 @@
 {
   "name": "property-os-template",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Codex and Claude ready operating workspace for premium rental property workflows.",
   "license": "MIT",
   "private": true,
@@ -11,9 +11,11 @@
   },
   "homepage": "https://github.com/frankxai/property-os-template#readme",
   "scripts": {
-    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs && node scripts/agent-workflow-dry-run.mjs && node mcp/server/scripts/smoke.mjs",
+    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs && node scripts/agent-workflow-dry-run.mjs && npm --prefix mcp/server test",
     "agent:dry-run": "node scripts/agent-workflow-dry-run.mjs",
-    "mcp:smoke": "node mcp/server/scripts/smoke.mjs",
+    "mcp:smoke": "npm --prefix mcp/server run smoke",
+    "mcp:test": "npm --prefix mcp/server test",
+    "mcp:http": "npm --prefix mcp/server run start:http",
     "privacy": "node scripts/privacy-scan.mjs"
   }
 }

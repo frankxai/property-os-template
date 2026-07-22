@@ -32,6 +32,8 @@ description: Use when working on rental property profiles, listing drafts, rente
 - Renter portal knowledge: convert approved facts into self-service answers.
 - Maintenance triage: classify urgency and draft owner notes.
 - Weekly review: summarize open issues, vacancy risk, listing status, and decisions.
+- Agent mission: one specialist, one objective, one success metric, one reviewable artifact.
+- Controlled transition: proposal, owner decision, server receipt, exact internal apply, audit and undo.
 
 ## Output Shape
 
@@ -43,6 +45,16 @@ Return:
 - `Approval Required`
 - `Risks Or Unknowns`
 - `Next Action`
+- `Success Metric`
+- `Evidence Receipt`
+
+## Control Plane
+
+- Read `agents/team.manifest.json` before assigning specialist work.
+- Read `property://contracts/authority` or `mcp/property-os.mcp.json` before calling a tool.
+- Use `.swarm/property-os.yml` only after machine preflight admits parallel agents.
+- Never treat a user-supplied confirmation boolean as authorization.
+- Never turn an approved draft into an external action in v1.
 
 ## Workflow Contracts
 
