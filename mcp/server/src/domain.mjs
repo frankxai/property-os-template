@@ -1,4 +1,5 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
+import { assertAgentSafeInput, createAgentRuntimeFromEnv } from "./agent-runtime.mjs";
 import { MemoryPropertyOsRepository } from "./repository.mjs";
 
 const EXTERNAL_ACTIONS = new Set([
@@ -117,10 +118,16 @@ function output(value) {
 }
 
 export class PropertyOsEngine {
-  constructor({ now = () => new Date(), receiptTtlMs = 15 * 60 * 1000, repository = new MemoryPropertyOsRepository() } = {}) {
+  constructor({
+    now = () => new Date(),
+    receiptTtlMs = 15 * 60 * 1000,
+    repository = new MemoryPropertyOsRepository(),
+    agentRuntime = createAgentRuntimeFromEnv(process.env, { now })
+  } = {}) {
     this.now = now;
     this.receiptTtlMs = receiptTtlMs;
     this.repository = repository;
+    this.agentRuntime = agentRuntime;
   }
 
   getResource(uri) {
@@ -141,6 +148,12 @@ export class PropertyOsEngine {
     switch (name) {
       case "create_agent_mission":
         return output(await this.createMission(args, context));
+      case "record_approved_evidence":
+        return output(await this.recordApprovedEvidence(args, context));
+      case "run_agent_draft":
+        return output(await this.runAgentDraft(args, context));
+      case "record_agent_run_review":
+        return output(await this.recordAgentRunReview(args, context));
       case "create_inquiry_summary":
         return output(this.createInquirySummary(args, context));
       case "create_support_ticket_summary":
@@ -192,6 +205,84 @@ export class PropertyOsEngine {
       ownerAction: "Review the mission objective and evidence gate before any agent output is reused."
     };
     return this.repository.createMission(mission);
+  }
+
+  async recordApprovedEvidence(args, context) {
+    requireScope(context, "property:approve");
+    requireOwner(context);
+    const tenantId = assertTenant(context, args.organizationId);
+    const ref = clean(args.ref, 180);
+    const excerpt = clean(args.excerpt, 2000);
+    assertAgentSafeInput(excerpt);
+    const contentHash = createHash("sha256").update(excerpt).digest("hex");
+    const evidence = {
+      tenantId,
+      ref,
+      propertyId: clean(args.propertyId, 120) || null,
+      excerpt,
+      sourceType: clean(args.sourceType, 60),
+      sourceVersionHash: clean(args.sourceVersionHash, 128),
+      contentHash,
+      approvedBy: context.actorId,
+      approvedAt: this.now().toISOString()
+    };
+    await this.repository.recordApprovedEvidence(evidence);
+    return {
+      ref,
+      propertyId: evidence.propertyId,
+      sourceType: evidence.sourceType,
+      sourceVersionHash: evidence.sourceVersionHash,
+      contentHash,
+      approvalStatus: "approved",
+      contentApplied: true,
+      applicationScope: "internal-evidence-store-only",
+      externalActionsPerformed: [],
+      ownerAction: "The exact evidence hash is available to future drafts. Replace it explicitly if the approved fact changes."
+    };
+  }
+
+  async runAgentDraft(args, context) {
+    requireScope(context, "property:draft");
+    const tenantId = assertTenant(context, args.organizationId);
+    const missionId = clean(args.missionId, 180);
+    const mission = await this.repository.getMission(tenantId, missionId);
+    if (!mission) failClosed("Agent mission not found in this tenant.", "MISSION_NOT_FOUND");
+    if (mission.role !== args.role) failClosed("Agent role does not match the selected mission.", "MISSION_ROLE_MISMATCH");
+    if (mission.propertyId && args.propertyId && mission.propertyId !== clean(args.propertyId, 120)) {
+      failClosed("Agent property does not match the selected mission.", "MISSION_PROPERTY_MISMATCH");
+    }
+    const evidenceRefs = args.evidenceRefs.map((ref) => clean(ref, 180));
+    if (new Set(evidenceRefs).size !== evidenceRefs.length) failClosed("Evidence references must be unique.", "DUPLICATE_EVIDENCE_REF");
+    const evidence = await this.repository.getApprovedEvidence(tenantId, evidenceRefs, clean(args.propertyId, 120) || mission.propertyId || null);
+    const run = await this.agentRuntime.draft({
+      missionId,
+      propertyId: clean(args.propertyId, 120) || mission.propertyId || null,
+      role: args.role,
+      outputType: args.outputType,
+      objective: clean(args.objective, 1000),
+      evidence
+    }, context);
+    await this.repository.createAgentRun(run);
+    return run;
+  }
+
+  async recordAgentRunReview(args, context) {
+    requireScope(context, "property:approve");
+    requireOwner(context);
+    assertTenant(context, args.organizationId);
+    const result = await this.repository.recordAgentRunReview({
+      context,
+      runId: clean(args.runId, 180),
+      decision: clean(args.decision, 40),
+      feedback: clean(args.feedback, 600) || null,
+      now: this.now()
+    });
+    return {
+      ...result,
+      ownerAction: result.decision === "request-revision"
+        ? "Revise the mission evidence or objective before running another draft."
+        : "The review is recorded. Any message, publication, pricing, applicant, access, or dispatch action remains a separate manual step."
+    };
   }
 
   createInquirySummary(args, context) {

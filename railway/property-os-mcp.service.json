@@ -12,9 +12,14 @@
     "PROPERTY_OS_MCP_PUBLIC_URL",
     "PROPERTY_OS_MCP_ALLOWED_HOSTS",
     "PROPERTY_OS_MCP_ALLOWED_ORIGINS",
-    "PROPERTY_OS_DEFAULT_TENANT_ID"
+    "PROPERTY_OS_DEFAULT_TENANT_ID",
+    "DATABASE_URL",
+    "PROPERTY_OS_AI_MODEL",
+    "PROPERTY_OS_AI_TIMEOUT_MS",
+    "PROPERTY_OS_AI_MAX_OUTPUT_TOKENS",
+    "AI_GATEWAY_API_KEY"
   ],
-  "firstMilestone": "Deploy authenticated resources, missions, dry-run tools, and the internal controlled-transition proof. Keep all external actions blocked.",
+  "firstMilestone": "Deploy authenticated resources, durable missions, governed structured agent drafts, owner review outcomes, dry-run tools, and the internal controlled-transition proof. Keep all external actions blocked.",
   "blockedV1": [
     "publish_listing",
     "send_renter_message",

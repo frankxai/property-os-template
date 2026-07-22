@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import * as z from "zod/v4";
+import { agentOutputTypes } from "./agent-runtime.mjs";
 import { agentProfiles, blockedV1Tools, createPropertyOsEngine, sampleResources } from "./domain.mjs";
 
 const text = (max) => z.string().trim().min(1).max(max);
@@ -16,6 +17,44 @@ export const toolDefinitions = [
       propertyId: optionalText(120),
       objective: text(800),
       successMetric: text(240)
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+  },
+  {
+    name: "run_agent_draft",
+    description: "Generate and persist one structured, evidence-grounded draft for an existing mission. The model has no tools and every result requires owner review.",
+    inputSchema: {
+      organizationId,
+      missionId: text(180),
+      role: z.enum(agentProfiles.map((profile) => profile.id)),
+      propertyId: optionalText(120),
+      outputType: z.enum(agentOutputTypes),
+      objective: text(1000),
+      evidenceRefs: z.array(text(180)).min(1).max(12)
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+  },
+  {
+    name: "record_approved_evidence",
+    description: "Record an owner-approved, versioned evidence excerpt in the tenant store for later grounded drafts. It performs no external action.",
+    inputSchema: {
+      organizationId,
+      ref: text(180),
+      propertyId: optionalText(120),
+      excerpt: text(2000),
+      sourceType: z.enum(["property-profile", "knowledge-article", "policy", "listing-fact"]),
+      sourceVersionHash: text(128)
+    },
+    annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+  },
+  {
+    name: "record_agent_run_review",
+    description: "Record an owner decision on a generated draft. This updates review state only and never sends, publishes, prices, approves, or dispatches anything.",
+    inputSchema: {
+      organizationId,
+      runId: text(180),
+      decision: z.enum(["accept-draft", "request-revision", "reject-draft"]),
+      feedback: optionalText(600)
     },
     annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
   },

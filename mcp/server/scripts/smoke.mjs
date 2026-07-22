@@ -16,7 +16,7 @@ if (serverVersion?.name !== "property-os" || serverVersion?.version !== "0.2.0")
 }
 
 const listedTools = await client.listTools();
-for (const required of ["create_agent_mission", "run_listing_dry_run", "propose_controlled_transition", "record_owner_decision", "apply_approved_transition"]) {
+for (const required of ["create_agent_mission", "record_approved_evidence", "run_agent_draft", "record_agent_run_review", "run_listing_dry_run", "propose_controlled_transition", "record_owner_decision", "apply_approved_transition"]) {
   if (!listedTools.tools.some((tool) => tool.name === required)) throw new Error(`MCP tools list is missing ${required}.`);
 }
 

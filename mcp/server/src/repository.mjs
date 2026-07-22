@@ -86,6 +86,8 @@ export class MemoryPropertyOsRepository {
   constructor() {
     this.kind = "memory";
     this.missions = new Map();
+    this.approvedEvidence = new Map();
+    this.agentRuns = new Map();
     this.proposals = new Map();
     this.receipts = new Map();
     this.transitions = new Map();
@@ -113,6 +115,81 @@ export class MemoryPropertyOsRepository {
     return this.serialized(() => {
       this.missions.set(mission.id, structuredClone(mission));
       return mission;
+    });
+  }
+
+  async getMission(tenantId, missionId) {
+    const mission = this.missions.get(missionId);
+    return mission?.tenantId === tenantId ? structuredClone(mission) : undefined;
+  }
+
+  async recordApprovedEvidence(evidence) {
+    return this.serialized(() => {
+      this.approvedEvidence.set(`${evidence.tenantId}:${evidence.ref}`, structuredClone(evidence));
+      return evidence;
+    });
+  }
+
+  async getApprovedEvidence(tenantId, refs, propertyId) {
+    return refs.map((ref) => {
+      const evidence = this.approvedEvidence.get(`${tenantId}:${ref}`);
+      if (!evidence) failClosed(`Approved evidence was not found: ${ref}.`, "APPROVED_EVIDENCE_NOT_FOUND");
+      if (evidence.propertyId && evidence.propertyId !== propertyId) {
+        failClosed(`Approved evidence belongs to a different property: ${ref}.`, "EVIDENCE_PROPERTY_MISMATCH");
+      }
+      return {
+        ref: evidence.ref,
+        excerpt: evidence.excerpt,
+        contentHash: evidence.contentHash,
+        sourceVersionHash: evidence.sourceVersionHash,
+        approvalStatus: "approved"
+      };
+    });
+  }
+
+  async createAgentRun(run) {
+    return this.serialized(() => {
+      const mission = this.missions.get(run.missionId);
+      if (!mission || mission.tenantId !== run.tenantId) failClosed("Agent mission not found in this tenant.", "MISSION_NOT_FOUND");
+      if (mission.role !== run.role) failClosed("Agent run role does not match its mission.", "MISSION_ROLE_MISMATCH");
+      mission.status = "owner-review";
+      mission.updatedAt = run.createdAt;
+      this.agentRuns.set(run.id, structuredClone(run));
+      return run;
+    });
+  }
+
+  async recordAgentRunReview({ context, runId, decision, feedback, now }) {
+    return this.serialized(() => {
+      const run = this.agentRuns.get(runId);
+      if (!run || run.tenantId !== context.tenantId) failClosed("Agent run not found in this tenant.", "AGENT_RUN_NOT_FOUND");
+      if (run.status !== "owner-review") failClosed(`Agent run is already ${run.status}.`, "AGENT_RUN_ALREADY_REVIEWED");
+      const statusByDecision = {
+        "accept-draft": "accepted",
+        "request-revision": "revision-requested",
+        "reject-draft": "rejected"
+      };
+      const status = statusByDecision[decision];
+      if (!status) failClosed("Agent run decision is not supported.", "INVALID_AGENT_RUN_DECISION");
+      run.status = status;
+      run.ownerDecision = decision;
+      run.reviewFeedback = feedback;
+      run.reviewedBy = context.actorId;
+      run.reviewedAt = now.toISOString();
+      const mission = this.missions.get(run.missionId);
+      if (mission) {
+        mission.status = decision === "accept-draft" ? "verified" : decision === "request-revision" ? "planned" : "stopped";
+        mission.updatedAt = run.reviewedAt;
+      }
+      return {
+        runId,
+        missionId: run.missionId,
+        decision,
+        status,
+        contentApplied: false,
+        externalActionsPerformed: [],
+        reviewedAt: run.reviewedAt
+      };
     });
   }
 
@@ -249,10 +326,12 @@ export class PostgresPropertyOsRepository {
     try {
       const rows = await this.sql`
         select to_regclass('public.agent_missions') as missions,
+               to_regclass('public.approved_evidence') as evidence,
+               to_regclass('public.agent_runs') as runs,
                to_regclass('public.resource_versions') as versions,
                to_regclass('public.controlled_transitions') as transitions
       `;
-      const ready = Boolean(rows[0]?.missions && rows[0]?.versions && rows[0]?.transitions);
+      const ready = Boolean(rows[0]?.missions && rows[0]?.evidence && rows[0]?.runs && rows[0]?.versions && rows[0]?.transitions);
       return { ready, adapter: this.kind, durable: true, schema: ready ? "ready" : "missing" };
     } catch {
       return { ready: false, adapter: this.kind, durable: true, schema: "unreachable" };
@@ -281,6 +360,198 @@ export class PostgresPropertyOsRepository {
       });
     });
     return mission;
+  }
+
+  async getMission(tenantId, missionId) {
+    return this.tenantTransaction(tenantId, async (tx) => {
+      const rows = await tx`
+        select id, organization_id, role, property_slug, objective, success_metric, status, authority,
+               stages, owner_action, created_at, updated_at
+        from agent_missions
+        where id = ${missionId} and organization_id = ${tenantId}
+      `;
+      const mission = rows[0];
+      if (!mission) return undefined;
+      return {
+        id: mission.id,
+        tenantId: mission.organization_id,
+        role: mission.role,
+        propertyId: mission.property_slug,
+        objective: mission.objective,
+        successMetric: mission.success_metric,
+        status: mission.status,
+        authority: mission.authority,
+        stages: mission.stages,
+        ownerAction: mission.owner_action,
+        createdAt: mission.created_at.toISOString(),
+        updatedAt: mission.updated_at.toISOString()
+      };
+    });
+  }
+
+  async recordApprovedEvidence(evidence) {
+    return this.tenantTransaction(evidence.tenantId, async (tx) => {
+      await tx`
+        insert into approved_evidence (
+          organization_id, ref, property_slug, excerpt, source_type, source_version_hash,
+          content_hash, approved_by, approved_at, updated_at
+        ) values (
+          ${evidence.tenantId}, ${evidence.ref}, ${evidence.propertyId}, ${evidence.excerpt},
+          ${evidence.sourceType}, ${evidence.sourceVersionHash}, ${evidence.contentHash},
+          ${evidence.approvedBy}, ${evidence.approvedAt}, ${evidence.approvedAt}
+        )
+        on conflict (organization_id, ref) do update set
+          property_slug = excluded.property_slug,
+          excerpt = excluded.excerpt,
+          source_type = excluded.source_type,
+          source_version_hash = excluded.source_version_hash,
+          content_hash = excluded.content_hash,
+          approved_by = excluded.approved_by,
+          approved_at = excluded.approved_at,
+          updated_at = excluded.updated_at
+      `;
+      await this.insertAudit(tx, {
+        tenantId: evidence.tenantId,
+        actorId: evidence.approvedBy,
+        eventType: "approved_evidence.recorded",
+        subjectType: "approved_evidence",
+        subjectId: evidence.ref,
+        metadata: {
+          propertyId: evidence.propertyId,
+          sourceType: evidence.sourceType,
+          sourceVersionHash: evidence.sourceVersionHash,
+          contentHash: evidence.contentHash,
+          externalActionsPerformed: []
+        }
+      });
+      return evidence;
+    });
+  }
+
+  async getApprovedEvidence(tenantId, refs, propertyId) {
+    return this.tenantTransaction(tenantId, async (tx) => {
+      const evidence = [];
+      for (const ref of refs) {
+        const rows = await tx`
+          select ref, property_slug, excerpt, content_hash, source_version_hash from approved_evidence
+          where organization_id = ${tenantId} and ref = ${ref}
+        `;
+        if (!rows[0]) failClosed(`Approved evidence was not found: ${ref}.`, "APPROVED_EVIDENCE_NOT_FOUND");
+        if (rows[0].property_slug && rows[0].property_slug !== propertyId) {
+          failClosed(`Approved evidence belongs to a different property: ${ref}.`, "EVIDENCE_PROPERTY_MISMATCH");
+        }
+        evidence.push({
+          ref: rows[0].ref,
+          excerpt: rows[0].excerpt,
+          contentHash: rows[0].content_hash,
+          sourceVersionHash: rows[0].source_version_hash,
+          approvalStatus: "approved"
+        });
+      }
+      return evidence;
+    });
+  }
+
+  async createAgentRun(run) {
+    return this.tenantTransaction(run.tenantId, async (tx) => {
+      const missions = await tx`
+        select id, role from agent_missions
+        where id = ${run.missionId} and organization_id = ${run.tenantId}
+        for update
+      `;
+      if (!missions[0]) failClosed("Agent mission not found in this tenant.", "MISSION_NOT_FOUND");
+      if (missions[0].role !== run.role) failClosed("Agent run role does not match its mission.", "MISSION_ROLE_MISMATCH");
+      await tx`
+        insert into agent_runs (
+          id, organization_id, mission_id, property_slug, role, output_type, status, authority,
+          model_alias, prompt_version, evidence_refs, output, output_hash, input_tokens,
+          output_tokens, total_tokens, latency_ms, risk_level, created_by, created_at
+        ) values (
+          ${run.id}, ${run.tenantId}, ${run.missionId}, ${run.propertyId}, ${run.role}, ${run.outputType},
+          ${run.status}, ${run.authority}, ${run.modelAlias}, ${run.promptVersion}, ${tx.json(run.evidenceSnapshot)},
+          ${tx.json(run.output)}, ${run.outputHash}, ${run.usage.inputTokens}, ${run.usage.outputTokens},
+          ${run.usage.totalTokens}, ${run.latencyMs}, ${run.riskLevel}, ${run.createdBy}, ${run.createdAt}
+        )
+      `;
+      await tx`
+        update agent_missions set status = 'owner-review', updated_at = ${run.createdAt}
+        where id = ${run.missionId} and organization_id = ${run.tenantId}
+      `;
+      await this.insertAudit(tx, {
+        tenantId: run.tenantId,
+        actorId: run.createdBy,
+        eventType: "agent_run.created",
+        subjectType: "agent_run",
+        subjectId: run.id,
+        metadata: {
+          missionId: run.missionId,
+          role: run.role,
+          outputType: run.outputType,
+          modelAlias: run.modelAlias,
+          promptVersion: run.promptVersion,
+          evidenceSnapshot: run.evidenceSnapshot,
+          outputHash: run.outputHash,
+          riskLevel: run.riskLevel,
+          latencyMs: run.latencyMs,
+          usage: run.usage,
+          contentApplied: false,
+          externalActionsPerformed: []
+        }
+      });
+      return run;
+    });
+  }
+
+  async recordAgentRunReview({ context, runId, decision, feedback, now }) {
+    return this.tenantTransaction(context.tenantId, async (tx) => {
+      const rows = await tx`
+        select id, mission_id, status from agent_runs
+        where id = ${runId} and organization_id = ${context.tenantId}
+        for update
+      `;
+      const run = rows[0];
+      if (!run) failClosed("Agent run not found in this tenant.", "AGENT_RUN_NOT_FOUND");
+      if (run.status !== "owner-review") failClosed(`Agent run is already ${run.status}.`, "AGENT_RUN_ALREADY_REVIEWED");
+      const statusByDecision = {
+        "accept-draft": "accepted",
+        "request-revision": "revision-requested",
+        "reject-draft": "rejected"
+      };
+      const missionStatusByDecision = {
+        "accept-draft": "verified",
+        "request-revision": "planned",
+        "reject-draft": "stopped"
+      };
+      const status = statusByDecision[decision];
+      if (!status) failClosed("Agent run decision is not supported.", "INVALID_AGENT_RUN_DECISION");
+      const reviewedAt = now.toISOString();
+      await tx`
+        update agent_runs set status = ${status}, owner_decision = ${decision}, review_feedback = ${feedback},
+          reviewed_by = ${context.actorId}, reviewed_at = ${reviewedAt}
+        where id = ${runId} and organization_id = ${context.tenantId}
+      `;
+      await tx`
+        update agent_missions set status = ${missionStatusByDecision[decision]}, updated_at = ${reviewedAt}
+        where id = ${run.mission_id} and organization_id = ${context.tenantId}
+      `;
+      await this.insertAudit(tx, {
+        tenantId: context.tenantId,
+        actorId: context.actorId,
+        eventType: "agent_run.reviewed",
+        subjectType: "agent_run",
+        subjectId: runId,
+        metadata: { missionId: run.mission_id, decision, status, contentApplied: false, externalActionsPerformed: [] }
+      });
+      return {
+        runId,
+        missionId: run.mission_id,
+        decision,
+        status,
+        contentApplied: false,
+        externalActionsPerformed: [],
+        reviewedAt
+      };
+    });
   }
 
   async proposeTransition(proposal) {

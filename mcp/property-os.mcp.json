@@ -16,6 +16,9 @@
   ],
   "tools": [
     "create_agent_mission",
+    "record_approved_evidence",
+    "run_agent_draft",
+    "record_agent_run_review",
     "create_inquiry_summary",
     "create_support_ticket_summary",
     "draft_listing",
@@ -56,6 +59,7 @@
     "tenantIsolation": "verified-token-claim-or-single-tenant-service-token",
     "ownerApproval": "server-issued-expiring-single-use-receipt",
     "controlledTransitions": "proposal-owner-decision-bound-receipt-exact-apply-audit-undo",
+    "agentRuntime": "approved-evidence-structured-output-no-tools-owner-review",
     "externalActions": "blocked-in-v1"
   }
 }

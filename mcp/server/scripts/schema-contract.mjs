@@ -1,14 +1,20 @@
 import { readFile } from "node:fs/promises";
 
-const schemaUrl = new URL("../db/001-control-plane.sql", import.meta.url);
+const schemaUrls = [
+  new URL("../db/001-control-plane.sql", import.meta.url),
+  new URL("../db/002-governed-agent-runtime.sql", import.meta.url)
+];
 const repositoryUrl = new URL("../src/repository.mjs", import.meta.url);
-const [schema, repository] = await Promise.all([
-  readFile(schemaUrl, "utf8"),
+const [schemas, repository] = await Promise.all([
+  Promise.all(schemaUrls.map((url) => readFile(url, "utf8"))),
   readFile(repositoryUrl, "utf8")
 ]);
+const schema = schemas.join("\n");
 
 const requiredTables = [
   "agent_missions",
+  "approved_evidence",
+  "agent_runs",
   "resource_versions",
   "transition_proposals",
   "approval_receipts",

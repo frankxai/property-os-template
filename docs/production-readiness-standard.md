@@ -26,6 +26,7 @@
 - notifications retry safely
 - integrations have dry-run mode
 - failed agent runs are visible
+- model timeouts and schema/policy failures fail closed without downstream work
 - owner can continue manually if an integration fails
 
 ### Agent Governance
@@ -35,6 +36,8 @@
 - commands exist for install, commercial offer, audit, and production readiness
 - blocked actions are encoded in docs and evals
 - every consequential output includes owner action
+- each successful model run cites approved evidence and records an owner review outcome
+- draft calls resolve evidence from the tenant ledger; a caller cannot self-declare approval
 
 ### Deployment
 

@@ -18,7 +18,7 @@ Keep the public portal on Vercel unless the repo is intentionally moved.
 | Service | Runtime | Role |
 | --- | --- | --- |
 | portal | Vercel Next.js | public property pages, renter portal, owner/admin UI |
-| postgres | managed Postgres | organizations, properties, tickets, missions, accepted-state versions, receipts, transitions, audit |
+| postgres | managed Postgres | organizations, properties, tickets, missions, model runs, owner reviews, accepted-state versions, receipts, transitions, audit |
 | object-storage | Vercel Blob or Supabase Storage | media and documents |
 | property-os-mcp | Railway Node/TS | MCP resources, tools, prompts |
 | queue-worker | Railway Node/TS | weekly digest, retry, dry-run integration jobs |
@@ -42,7 +42,7 @@ Use separate environments for development, preview, and production. Agents may r
 
 ## First Railway Milestone
 
-Apply `mcp/server/db/001-control-plane.sql` with a migration role, then deploy `mcp/server` with its Dockerfile, `DATABASE_URL`, and `/readyz` health check. Start with one private pilot tenant, a generated bearer token, allowed host/origin policy, durable mission tools, dry runs, and the internal controlled-transition proof. External actions remain blocked.
+Apply `mcp/server/db/001-control-plane.sql` and `mcp/server/db/002-governed-agent-runtime.sql` in order with a migration role, then deploy `mcp/server` with its Dockerfile, `DATABASE_URL`, and `/readyz` health check. Configure a release-pinned `PROPERTY_OS_AI_MODEL` plus Railway-held `AI_GATEWAY_API_KEY`. Start with one private pilot tenant, a generated bearer token, allowed host/origin policy, durable mission and draft tools, owner review outcomes, dry runs, and the internal controlled-transition proof. External actions remain blocked.
 
 ## Production Auth Milestone
 
@@ -55,6 +55,7 @@ Move from static bearer to OIDC mode before agency or marketplace use. Configure
 - health check `/readyz`
 - generated secrets, never defaults
 - private Postgres hostname and a non-bypass-RLS runtime role
+- AI Gateway key stored only in Railway and structured drafting pinned by model alias and prompt version
 - one public domain for `/mcp`
 - separate development, preview, and production environments
 - deployment support and update policy documented before Marketplace publication

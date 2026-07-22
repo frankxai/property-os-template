@@ -35,9 +35,13 @@ Portal:
 Railway MCP:
 
 - `PROPERTY_OS_MCP_AUTH_MODE`
-- `PROPERTY_OS_DATABASE_URL`
-- `PROPERTY_OS_ALLOWED_ORIGINS`
+- `DATABASE_URL`
+- `PROPERTY_OS_MCP_ALLOWED_ORIGINS`
 - `PROPERTY_OS_AUDIT_MODE`
+- `PROPERTY_OS_AI_MODEL`
+- `PROPERTY_OS_AI_TIMEOUT_MS`
+- `PROPERTY_OS_AI_MAX_OUTPUT_TOKENS`
+- `AI_GATEWAY_API_KEY`
 
 Do not commit values. Store them in Vercel or Railway environment settings.
 
@@ -57,10 +61,12 @@ Before owner handoff, run `npm run install:proof` in the portal repo and review 
 8. Turn on runtime database and verify `/admin/runtime`.
 9. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
 10. Wire sanitized owner notification webhook or worker.
-11. Deploy MCP server in read-only plus dry-run mode.
-12. Verify owner approval queue.
-13. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, and visual QA.
-14. Keep listing publication manual.
+11. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order.
+12. Deploy MCP server in mission, structured-draft, owner-review, and dry-run mode.
+13. Run one approved-evidence agent draft and record an owner review outcome.
+14. Verify owner approval queue.
+15. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, and visual QA.
+16. Keep listing publication manual.
 
 ## Blocked Until Proven
 

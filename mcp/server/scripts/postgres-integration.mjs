@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { PGlite } from "@electric-sql/pglite";
+import { PropertyOsAgentRuntime } from "../src/agent-runtime.mjs";
 import { createPropertyOsEngine } from "../src/domain.mjs";
 import { PostgresPropertyOsRepository } from "../src/repository.mjs";
 
@@ -21,10 +22,13 @@ const owner = {
   }
 };
 const db = new PGlite();
-const migration = await readFile(new URL("../db/001-control-plane.sql", import.meta.url), "utf8");
+const migrations = await Promise.all([
+  readFile(new URL("../db/001-control-plane.sql", import.meta.url), "utf8"),
+  readFile(new URL("../db/002-governed-agent-runtime.sql", import.meta.url), "utf8")
+]);
 
 try {
-  await db.exec(migration);
+  for (const migration of migrations) await db.exec(migration);
   await db.exec(`
     insert into organizations (id, name) values ('org-a', 'Organization A'), ('org-b', 'Organization B');
     create role property_os_runtime nologin;
@@ -38,7 +42,23 @@ try {
   const repository = new PostgresPropertyOsRepository("pglite://contract-test", { sql });
   const health = await repository.health();
   if (!health.ready || health.adapter !== "postgres") throw new Error("Durable repository readiness failed after migration.");
-  const engine = createPropertyOsEngine({ repository });
+  const agentRuntime = new PropertyOsAgentRuntime({
+    env: { PROPERTY_OS_AI_MODEL: "test/provider-model" },
+    generate: async () => ({
+      output: {
+        summary: "A durable grounded draft is ready.",
+        draft: "The property facts are prepared for owner review.",
+        evidenceRefs: ["knowledge://sample/profile"],
+        missingFacts: ["Owner must confirm availability."],
+        risks: ["No availability was inferred."],
+        confidence: "high",
+        ownerAction: "Review the draft before reuse.",
+        recommendedNextSteps: ["Compare the draft with the approved profile."]
+      },
+      usage: { inputTokens: 100, outputTokens: 50, totalTokens: 150 }
+    })
+  });
+  const engine = createPropertyOsEngine({ repository, agentRuntime });
 
   const mission = (await engine.executeTool("create_agent_mission", {
     organizationId: "org-a",
@@ -52,6 +72,62 @@ try {
   const ownRows = await repository.tenantTransaction("org-a", (tx) => tx`select id from agent_missions`);
   const otherRows = await repository.tenantTransaction("org-b", (tx) => tx`select id from agent_missions`);
   if (ownRows.length !== 1 || otherRows.length !== 0) throw new Error("Forced RLS did not isolate mission visibility.");
+
+  const evidence = (await engine.executeTool("record_approved_evidence", {
+    organizationId: "org-a",
+    ref: "knowledge://sample/profile",
+    propertyId: "sample-property",
+    excerpt: "The apartment has two bedrooms and a furnished kitchen.",
+    sourceType: "property-profile",
+    sourceVersionHash: "sample-profile-v1"
+  }, owner)).structuredContent;
+  if (evidence.approvalStatus !== "approved" || evidence.contentApplied !== true) {
+    throw new Error("Durable owner-approved evidence registration failed.");
+  }
+  const ownEvidence = await repository.tenantTransaction("org-a", (tx) => tx`select ref, content_hash from approved_evidence`);
+  const otherEvidence = await repository.tenantTransaction("org-b", (tx) => tx`select ref from approved_evidence`);
+  if (ownEvidence[0]?.ref !== evidence.ref || ownEvidence[0]?.content_hash !== evidence.contentHash || otherEvidence.length !== 0) {
+    throw new Error("Forced RLS did not isolate approved evidence visibility.");
+  }
+
+  const agentRun = (await engine.executeTool("run_agent_draft", {
+    organizationId: "org-a",
+    missionId: mission.id,
+    role: "property-steward",
+    propertyId: "sample-property",
+    outputType: "weekly-owner-review",
+    objective: "Prepare a durable owner-review draft.",
+    evidenceRefs: ["knowledge://sample/profile"]
+  }, owner)).structuredContent;
+  if (agentRun.status !== "owner-review" || agentRun.contentApplied !== false) {
+    throw new Error("Durable agent run crossed the draft-only boundary.");
+  }
+  const ownRuns = await repository.tenantTransaction("org-a", (tx) => tx`select id, output_hash, evidence_refs from agent_runs`);
+  const otherRuns = await repository.tenantTransaction("org-b", (tx) => tx`select id from agent_runs`);
+  if (ownRuns[0]?.id !== agentRun.id || ownRuns[0]?.output_hash !== agentRun.outputHash || otherRuns.length !== 0) {
+    throw new Error("Forced RLS did not isolate durable agent-run visibility.");
+  }
+  const evidenceSnapshot = typeof ownRuns[0]?.evidence_refs === "string" ? JSON.parse(ownRuns[0].evidence_refs) : ownRuns[0]?.evidence_refs;
+  if (evidenceSnapshot?.[0]?.contentHash !== evidence.contentHash || evidenceSnapshot?.[0]?.sourceVersionHash !== "sample-profile-v1") {
+    throw new Error("Durable agent run did not freeze the exact evidence version.");
+  }
+  const review = (await engine.executeTool("record_agent_run_review", {
+    organizationId: "org-a",
+    runId: agentRun.id,
+    decision: "accept-draft",
+    feedback: "Facts and owner boundary verified."
+  }, owner)).structuredContent;
+  if (review.status !== "accepted" || review.contentApplied !== false || review.externalActionsPerformed.length) {
+    throw new Error("Owner review changed content or crossed the external-action boundary.");
+  }
+  const reviewed = await repository.tenantTransaction("org-a", (tx) => tx`
+    select r.status, r.owner_decision, m.status as mission_status
+    from agent_runs r join agent_missions m on m.id = r.mission_id
+    where r.id = ${agentRun.id}
+  `);
+  if (reviewed[0]?.status !== "accepted" || reviewed[0]?.owner_decision !== "accept-draft" || reviewed[0]?.mission_status !== "verified") {
+    throw new Error("Durable owner review and mission state diverged.");
+  }
 
   const proposal = (await engine.executeTool("propose_controlled_transition", {
     organizationId: "org-a",

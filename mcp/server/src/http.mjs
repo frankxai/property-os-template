@@ -26,6 +26,7 @@ export function createPropertyOsHttpApp(options = {}) {
 
   app.get("/readyz", async (_req, res) => {
     const stateStore = await repository.health();
+    const agentRuntime = engine.agentRuntime.health();
     res.status(stateStore.ready ? 200 : 503).json({
       ready: stateStore.ready,
       service: "property-os-mcp",
@@ -36,6 +37,7 @@ export function createPropertyOsHttpApp(options = {}) {
       authMode: policy.authMode,
       tenantMode: policy.authMode === "oidc" ? "verified-claim" : "single-tenant-token",
       stateStore,
+      agentRuntime,
       policyVersion: "property-os-authority.v2",
       blockedActionCount: blockedV1Tools.length
     });
