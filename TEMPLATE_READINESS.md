@@ -41,7 +41,7 @@ The free edition keeps every safety control, sample workflow, schema, validation
 - legal/compliance review for local rental market
 - approved property photos and exact address publication policy
 - portal install proof packet exported with `npm run install:proof` and reviewed through `/api/install/proof-packet`
-- OIDC issuer, audience, JWKS, tenant claim, role claim, scopes, Origin allowlist, and health checks configured for hosted MCP
+- OIDC issuer, audience, JWKS, tenant claim, role claim, scopes, Origin allowlist, mandatory tenant allowlist, short-lived portal client credentials, and health checks configured for hosted MCP
 - controlled-transition persistence implemented transactionally if any internal transition is enabled beyond the sample proof flow
 
 ## Publish Action

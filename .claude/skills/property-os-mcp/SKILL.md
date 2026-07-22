@@ -49,7 +49,7 @@ Prompts provide repeatable workflows:
 - Write tools require organization auth, audit log, and owner approval where consequential.
 - No tool may publish listings, send renter messages, dispatch vendors, disclose access data, or make lease/pricing decisions in v1.
 - HTTP MCP deployments require authentication, rate limiting, retention, and tenant isolation.
-- Use static bearer auth only for a private single-tenant pilot. Use OIDC issuer, audience, JWKS, tenant claims, actor identity, and scopes for production.
+- Use static bearer auth only for a private single-tenant pilot. Production requires OIDC issuer, audience, JWKS, tenant claims, actor identity, scopes, a deployment tenant allowlist, and short-lived portal client credentials.
 - An owner decision is not a mutation. Controlled apply consumes an expiring, actor-bound, single-use receipt and returns audit plus undo evidence.
 - Run `npm --prefix mcp/server test` and `npm --prefix mcp/server run audit` before deployment.
 

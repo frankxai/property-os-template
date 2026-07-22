@@ -36,7 +36,7 @@ The v1 contract accepts only:
 
 Unknown fields fail closed. `unitCount` must be at least `propertyCount`. Community installs must remain self-service. Managed Ops must remain managed. Agency Platform plans require OIDC.
 
-OIDC in a plan is an architecture requirement, not a claim that the current portal adapter is production-ready. The generated identity gate remains `implementation-required` until role mapping, revocation, session behavior, and auth smoke are implemented and proven.
+OIDC code in the paired portal and MCP is locally implemented and adversarially hardened, but a generated plan remains `proof-required`. Agency activation still needs reviewed member pre-binding, a real IdP callback, signed service-token issuance, role and foreign-tenant denials, fixed session expiry, atomic revocation, and both live database smokes.
 
 ## Output Contract
 

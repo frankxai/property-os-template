@@ -1,9 +1,44 @@
 import { randomUUID } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { loadHttpPolicy } from "../src/auth.mjs";
 import { startPropertyOsHttpServer } from "../src/http.mjs";
 
 const token = randomUUID();
+
+const hostedBaseEnv = {
+  HOST: "0.0.0.0",
+  PROPERTY_OS_MCP_AUTH_MODE: "static",
+  PROPERTY_OS_MCP_AUTH_TOKEN: token,
+  PROPERTY_OS_MCP_PUBLIC_URL: "https://mcp.example.test/mcp",
+  PROPERTY_OS_MCP_ALLOWED_HOSTS: "mcp.example.test"
+};
+assertPolicyThrows({ ...hostedBaseEnv, PROPERTY_OS_MCP_AUTH_MODE: "unsupported" }, /must be static or oidc/);
+assertPolicyThrows({ ...hostedBaseEnv, PROPERTY_OS_MCP_AUTH_TOKEN: "too-short" }, /at least 32 bytes/);
+assertPolicyThrows({ ...hostedBaseEnv }, /DEFAULT_TENANT_ID is required/);
+assertPolicyThrows({ ...hostedBaseEnv, PROPERTY_OS_DEFAULT_TENANT_ID: "org-a" }, /ALLOWED_TENANTS is required/);
+assertPolicyThrows({
+  ...hostedBaseEnv,
+  PROPERTY_OS_DEFAULT_TENANT_ID: "org-a",
+  PROPERTY_OS_MCP_ALLOWED_TENANTS: "org-b"
+}, /must be admitted/);
+const hostedPolicy = loadHttpPolicy({
+  ...hostedBaseEnv,
+  PROPERTY_OS_DEFAULT_TENANT_ID: "org-a",
+  PROPERTY_OS_MCP_ALLOWED_TENANTS: "org-a"
+});
+if (!hostedPolicy.requireDurableState) throw new Error("Hosted policy did not require durable state.");
+
+function assertPolicyThrows(env, expected) {
+  try {
+    loadHttpPolicy(env);
+  } catch (error) {
+    if (expected.test(String(error?.message))) return;
+    throw error;
+  }
+  throw new Error(`Expected policy rejection matching ${expected}.`);
+}
+
 const { listener, port } = await startPropertyOsHttpServer({
   port: 0,
   host: "127.0.0.1",
@@ -11,10 +46,12 @@ const { listener, port } = await startPropertyOsHttpServer({
   authMode: "static",
   staticToken: token,
   defaultTenantId: "sample-org",
+  insecureLocal: true,
   actorId: "smoke-owner",
   actorRole: "owner",
   allowedHosts: ["127.0.0.1"],
-  allowedOrigins: ["https://portal.example.com"]
+  allowedOrigins: ["https://portal.example.com"],
+  allowedTenants: ["sample-org"]
 });
 const baseUrl = `http://127.0.0.1:${port}`;
 
@@ -24,7 +61,7 @@ try {
 
   const readiness = await fetch(`${baseUrl}/readyz`);
   const readinessBody = await readiness.json();
-  if (!readiness.ok || readinessBody.authMode !== "static" || readinessBody.transport !== "streamable-http") {
+  if (!readiness.ok || readinessBody.authMode !== "static" || readinessBody.transport !== "streamable-http" || readinessBody.durableStateRequired !== false) {
     throw new Error("HTTP readiness contract failed.");
   }
 
@@ -96,4 +133,27 @@ try {
   console.log("Property OS Streamable HTTP smoke passed.");
 } finally {
   await new Promise((resolve) => listener.close(resolve));
+}
+
+const hardened = await startPropertyOsHttpServer({
+  port: 0,
+  host: "127.0.0.1",
+  publicUrl: "http://127.0.0.1:8787/mcp",
+  authMode: "static",
+  staticToken: token,
+  defaultTenantId: "sample-org",
+  insecureLocal: true,
+  allowedHosts: ["127.0.0.1"],
+  allowedOrigins: [],
+  allowedTenants: ["sample-org"],
+  requireDurableState: true
+});
+try {
+  const response = await fetch(`http://127.0.0.1:${hardened.port}/readyz`);
+  const body = await response.json();
+  if (response.status !== 503 || body.ready !== false || body.stateStore?.durable !== false) {
+    throw new Error("Durable hosted-readiness policy accepted the memory repository.");
+  }
+} finally {
+  await new Promise((resolve) => hardened.listener.close(resolve));
 }

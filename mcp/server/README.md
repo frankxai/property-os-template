@@ -33,11 +33,13 @@ Set `PROPERTY_OS_AI_MODEL`, `PROPERTY_OS_AI_TIMEOUT_MS`, `PROPERTY_OS_AI_MAX_OUT
 
 ## Auth Modes
 
-`static` is for one private pilot tenant. Set `PROPERTY_OS_MCP_AUTH_TOKEN`, `PROPERTY_OS_DEFAULT_TENANT_ID`, `PROPERTY_OS_MCP_PUBLIC_URL`, and allowed hosts/origins.
+`static` is for one private pilot tenant. Set a generated high-entropy `PROPERTY_OS_MCP_AUTH_TOKEN` of at least 32 bytes, `PROPERTY_OS_DEFAULT_TENANT_ID`, an exact `PROPERTY_OS_MCP_ALLOWED_TENANTS` allowlist containing that tenant, `PROPERTY_OS_MCP_PUBLIC_URL`, and allowed hosts/origins.
 
-`oidc` is for production. Set issuer, audience, JWKS URL, tenant claim, and role claim. The server verifies JWT signature, issuer, audience, expiry, scopes, tenant, and actor before tool execution.
+`oidc` is for production. Set issuer, audience, JWKS URL, tenant claim, role claim, and the mandatory deployment tenant allowlist. The server verifies JWT signature, issuer, audience, expiry, scopes, tenant admission, and actor before tool execution. `npm run test:oidc` signs real RS256 tokens against a local JWKS server and proves valid, missing-tenant, foreign-tenant, wrong-issuer, wrong-audience, and expired outcomes.
 
-Static tokens are never a multi-tenant authorization model. Put the service behind an OAuth 2.1/OIDC authorization server for agency or marketplace use.
+Hosted public metadata, issuer, and JWKS URLs must use HTTPS and must not target private or reserved hosts. HTTP and loopback endpoints are accepted only when the server is explicitly bound to loopback with insecure-local mode for isolated protocol tests.
+
+Static tokens are never a multi-tenant authorization model. Agency portals obtain short-lived service tokens with client credentials; those tokens must carry the same tenant as `PROPERTY_OS_ORG_ID`, `PROPERTY_OS_MCP_ALLOWED_TENANTS`, and the activation packet.
 
 ## Authority Boundary
 
@@ -49,6 +51,6 @@ The controlled transition proof supports only `mark-draft-reviewed`:
 
 Approval does not apply content. Apply requires an exact, active, actor-bound, tenant-bound, short-lived, single-use receipt plus an idempotency key. All renter messaging, publishing, dispatch, applicant, access, pricing, and availability actions remain blocked.
 
-Without `DATABASE_URL`, the server uses memory for local protocol proofs only. With `DATABASE_URL`, it uses the durable Postgres repository in `src/repository.mjs`. Apply `db/001-control-plane.sql` and then `db/002-governed-agent-runtime.sql` before deployment. `/readyz` returns `503` when Postgres is unreachable or either required control-plane table set is missing.
+Without `DATABASE_URL`, the server uses memory for explicit loopback-only protocol proofs. Hosted readiness always requires durable state. With `DATABASE_URL`, the server uses the Postgres repository in `src/repository.mjs`. Apply `db/001-control-plane.sql` and then `db/002-governed-agent-runtime.sql` before deployment. `/readyz` returns `503` when durable state is absent, Postgres is unreachable, or either required control-plane table set is missing.
 
 The durable path forces tenant RLS, locks accepted resource versions, serializes each idempotency key with a transaction-scoped advisory lock, consumes approval receipts atomically, and writes audit evidence in the same transaction. Run `npm run test:postgres` for an embedded non-superuser RLS proof, then repeat the live database gate against the target managed Postgres before production.

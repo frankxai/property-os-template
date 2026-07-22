@@ -116,12 +116,12 @@
     },
     "migrations": {
       "type": "array",
-      "minItems": 6,
+      "minItems": 7,
       "items": { "$ref": "#/$defs/migration" }
     },
     "commands": {
       "type": "array",
-      "minItems": 18,
+      "minItems": 19,
       "items": { "$ref": "#/$defs/command" }
     },
     "acceptance": {

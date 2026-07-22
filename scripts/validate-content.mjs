@@ -112,10 +112,11 @@ const requiredSnippetChecks = [
     snippets: [
       "OWNER_PORTAL_SECRET",
       "OWNER_PORTAL_PASSCODE_HASH",
-      "OWNER_PORTAL_API_TOKEN",
-      "PROPERTY_OS_DEMO_AUTH",
+      "PROPERTY_OS_AUTH_MODE",
+      "no global owner bearer",
       "npm run auth:hash",
       "npm run auth:smoke",
+      "npm run identity:smoke",
       "npm run db:rls:smoke",
       "npm run install:proof",
       "/api/install/proof-packet",
@@ -128,9 +129,11 @@ const requiredSnippetChecks = [
     snippets: [
       "OWNER_PORTAL_SECRET",
       "OWNER_PORTAL_PASSCODE_HASH",
-      "OWNER_PORTAL_API_TOKEN",
+      "MCP_SERVER_AUTH_MODE",
+      "MCP_OIDC_CLIENT_SECRET",
       "npm run auth:hash",
       "npm run auth:smoke",
+      "npm run identity:smoke",
       "npm run db:rls:smoke",
       "npm run install:proof",
       "/api/install/proof-packet",
@@ -140,7 +143,7 @@ const requiredSnippetChecks = [
   {
     file: "docs/implementation-readiness-cockpit.md",
     snippets: [
-      "owner passcode auth",
+      "explicit auth mode",
       "npm run auth:smoke",
       "npm run install:proof",
       "/api/install/proof-packet",

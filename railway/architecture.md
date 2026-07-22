@@ -48,7 +48,7 @@ Run `npm run activation:verify` against the deployed endpoint before connecting 
 
 ## Production Auth Milestone
 
-Move from static bearer to OIDC mode before agency or marketplace use. Configure issuer, audience, JWKS URL, tenant claim, role claim, scopes, and allowed tenants. The public MCP service is a resource server; identity and authorization policy are not delegated to caller headers.
+Move from static bearer to OIDC mode before agency or marketplace use. Configure issuer, audience, JWKS URL, tenant claim, role claim, scopes, and the mandatory deployment tenant allowlist. The Vercel portal uses a dedicated client-credentials application and fetches short-lived service tokens; it does not store a global production MCP bearer. Prove portal organization equals service-token tenant equals allowlisted tenant equals activation tenant equals both RLS organizations.
 
 ## Railway Template Gate
 

@@ -125,15 +125,25 @@ function environmentPlan(config) {
           "PROPERTY_OS_MCP_OIDC_ISSUER",
           "PROPERTY_OS_MCP_OIDC_AUDIENCE",
           "PROPERTY_OS_MCP_OIDC_JWKS_URL",
+          "PROPERTY_OS_MCP_ALLOWED_TENANTS",
           "PROPERTY_OS_MCP_TENANT_CLAIM",
           "PROPERTY_OS_MCP_ROLE_CLAIM"
         ]
-      : ["PROPERTY_OS_MCP_AUTH_TOKEN"];
+      : ["PROPERTY_OS_MCP_AUTH_TOKEN", "PROPERTY_OS_MCP_ALLOWED_TENANTS"];
 
   const portalIdentityKeys =
     config.deployment.authMode === "oidc"
-      ? ["AUTH_PROVIDER", "OWNER_ADMIN_EMAIL"]
-      : ["OWNER_PORTAL_SECRET", "OWNER_PORTAL_PASSCODE_HASH"];
+      ? [
+          "PROPERTY_OS_AUTH_MODE",
+          "BETTER_AUTH_SECRET",
+          "PROPERTY_OS_OIDC_ISSUER",
+          "PROPERTY_OS_OIDC_AUTHORIZATION_URL",
+          "PROPERTY_OS_OIDC_TOKEN_URL",
+          "PROPERTY_OS_OIDC_JWKS_URL",
+          "PROPERTY_OS_OIDC_CLIENT_ID",
+          "PROPERTY_OS_OIDC_CLIENT_SECRET"
+        ]
+      : ["PROPERTY_OS_AUTH_MODE", "OWNER_PORTAL_SECRET", "OWNER_PORTAL_PASSCODE_HASH"];
 
   return {
     vercel: {
@@ -143,7 +153,10 @@ function environmentPlan(config) {
         "PROPERTY_OS_ORG_ID",
         ...portalIdentityKeys,
         "MCP_SERVER_URL",
-        "MCP_SERVER_ACCESS_TOKEN",
+        "MCP_SERVER_AUTH_MODE",
+        ...(config.deployment.authMode === "oidc"
+          ? ["MCP_OIDC_TOKEN_URL", "MCP_OIDC_CLIENT_ID", "MCP_OIDC_CLIENT_SECRET", "MCP_OIDC_AUDIENCE", "MCP_OIDC_SCOPE"]
+          : ["MCP_SERVER_ACCESS_TOKEN"]),
         "MCP_SERVER_ORIGIN",
         "OWNER_NOTIFICATION_WEBHOOK_URL",
         "OWNER_NOTIFICATION_WEBHOOK_SIGNING_SECRET",
@@ -152,7 +165,9 @@ function environmentPlan(config) {
         "OWNER_NOTIFICATION_WORKER_TOKEN"
       ],
       optionalKeys: [
-        "OWNER_PORTAL_API_TOKEN",
+        "PROPERTY_OS_OIDC_PROVIDER_ID",
+        "PROPERTY_OS_OIDC_ORGANIZATION_CLAIM",
+        "PROPERTY_OS_OIDC_ROLE_CLAIM",
         "GITHUB_ISSUE_REPO",
         "RUNTIME_STORE",
         "EMAIL_PROVIDER",
@@ -190,7 +205,8 @@ function environmentPlan(config) {
         "PROPERTY_OS_REMOTE_MCP_URL",
         "PROPERTY_OS_REMOTE_MCP_TOKEN",
         "PROPERTY_OS_REMOTE_MCP_ORIGIN",
-        "PROPERTY_OS_ACTIVATION_TENANT_ID"
+        "PROPERTY_OS_ACTIVATION_TENANT_ID",
+        ...(config.deployment.authMode === "oidc" ? ["PROPERTY_OS_EXPECTED_OIDC_SUBJECTS"] : [])
       ],
       optionalKeys: [
         "PROPERTY_OS_ACTIVATION_TIMEOUT_MS",
@@ -221,9 +237,9 @@ function phaseGates(config, unresolved) {
     {
       id: "identity-boundary",
       label: "Identity and access boundary",
-      status: config.deployment.authMode === "oidc" ? "implementation-required" : "proof-required",
+      status: "proof-required",
       ownerGate: true,
-      evidence: ["auth smoke", "role matrix", "revocation test"]
+      evidence: ["auth smoke", "signed-token negatives", "pre-bound role matrix", "revocation test", "foreign-tenant denial", "portal-service-token-activation-RLS tenant equality"]
     },
     {
       id: "portal-data-plane",
@@ -341,7 +357,7 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
   if (config.deployment.authMode === "static-private-pilot") {
     recommendations.push("Keep static passcode authentication private and single-tenant; implement and prove OIDC before agency use.");
   } else {
-    recommendations.push("Implement the portal OIDC adapter, role mapping, revocation, and session tests before handling real agency data.");
+    recommendations.push("Bind reviewed agency members to immutable OIDC subjects, then prove the real callback, role denials, fixed session expiry, atomic revocation, and tenant equality before handling real agency data.");
   }
   if (config.deployment.storageProvider === "tbd") {
     recommendations.push("Select a region-compatible private object store and prove signed access, retention, and deletion behavior.");
@@ -436,13 +452,20 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       },
       {
         order: 5,
+        repository: "property-portal-template",
+        path: "db/004-tenant-oidc.sql",
+        target: "portal-db",
+        proof: "pinned transactional auth schema, reviewed pre-binding, fixed revocable sessions, and active membership receipt"
+      },
+      {
+        order: 6,
         repository: "property-os-template",
         path: "mcp/server/db/001-control-plane.sql",
         target: "control-plane-db",
         proof: "control-plane schema receipt"
       },
       {
-        order: 6,
+        order: 7,
         repository: "property-os-template",
         path: "mcp/server/db/002-governed-agent-runtime.sql",
         target: "control-plane-db",
@@ -460,6 +483,10 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       { repository: "property-portal-template", phase: "local-gates", command: "npm run build", proof: "production build passes" },
       { repository: "property-portal-template", phase: "preview-gates", command: "npm run smoke", proof: "renter and owner route smoke passes" },
       { repository: "property-portal-template", phase: "identity", command: "npm run auth:smoke", proof: "protected routes and APIs reject unauthorized access" },
+      { repository: "property-portal-template", phase: "identity", command: "npm run identity:smoke", proof: "fail-closed mode, signed ID-token negatives, exact claims, role capabilities, and pinned schema contract pass" },
+      ...(config.deployment.authMode === "oidc"
+        ? [{ repository: "property-portal-template", phase: "identity", command: "npm run identity:db:smoke", proof: "reviewed pre-bound members, fixed sessions, revocation, and live identity database contract pass" }]
+        : []),
       { repository: "property-portal-template", phase: "data-plane", command: "npm run db:rls:smoke", proof: "live portal tenant isolation passes" },
       { repository: "property-portal-template", phase: "owner-notifications", command: "npm run notification:smoke", proof: "signed outbox, retry, urgent fallback, and idempotent acknowledgement pass with zero downstream actions" },
       { repository: "property-portal-template", phase: "handoff", command: "npm run install:proof", proof: "secret-free install proof packet" },
@@ -473,6 +500,9 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       { id: "approved-content", action: "Load only owner-approved facts, policies, media, and knowledge.", evidence: "signed content review", ownerApproval: true },
       { id: "portal-rls", action: "Apply portal migrations with a migration role and prove live tenant RLS.", evidence: "RLS smoke receipt", ownerApproval: false },
       { id: "control-ledger", action: "Apply MCP migrations to its separate logical database and non-bypass runtime role.", evidence: "migration and RLS receipt", ownerApproval: false },
+      config.deployment.authMode === "oidc"
+        ? { id: "identity-chain", action: "Prove portal organization, pre-bound owner identity, MCP service-token tenant, activation tenant, and both database RLS organizations are identical; reject a foreign tenant and revoke one test session.", evidence: "real IdP callback, signed token, pre-bound membership, foreign-tenant denial, atomic revocation, and tenant equality receipts", ownerApproval: false }
+        : { id: "identity-chain", action: "Prove the private owner cookie, portal organization, static MCP default tenant, activation tenant, and both database RLS organizations are identical; reject an invalid cookie and foreign tenant request.", evidence: "private-pilot auth, static-token tenant, denial, expiry, and tenant equality receipts", ownerApproval: false },
       { id: "remote-activation", action: "Run check-only activation before enabling the approved synthetic write proof.", evidence: "redacted activation receipt", ownerApproval: true },
       { id: "owner-review", action: "Create one evidence-grounded draft and reject it in the owner workbench.", evidence: "model, evidence, output, and review hashes", ownerApproval: true },
       { id: "urgent-route", action: "Trigger a synthetic urgent request; prove signed primary delivery, bounded retry, fallback after the acknowledgement timeout, and idempotent owner acknowledgement.", evidence: "provider delivery, fallback, payload hash, and owner acknowledgement receipts", ownerApproval: true },

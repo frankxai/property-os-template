@@ -17,6 +17,8 @@ Property OS exposes one governed interoperability layer for Codex, Claude, partn
 - Streamable HTTP is the hosted route for Vercel integrations, agency services, and Railway.
 - Static bearer mode supports one private pilot tenant.
 - OIDC JWT mode is required for multi-tenant production.
+- OIDC mode also requires a deployment tenant allowlist; a valid token from an admitted issuer cannot select an unapproved tenant.
+- Agency portals use short-lived client-credential tokens, not a stored global MCP bearer.
 - Portal APIs remain the source for interactive owner decisions and high-frequency product state.
 
 Run `npm --prefix mcp/server test` before every release. See `docs/ai-architecture-and-control-plane.md` and `mcp/property-os.mcp.json`.

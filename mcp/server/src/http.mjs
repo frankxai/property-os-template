@@ -27,15 +27,17 @@ export function createPropertyOsHttpApp(options = {}) {
   app.get("/readyz", async (_req, res) => {
     const stateStore = await repository.health();
     const agentRuntime = engine.agentRuntime.health();
-    res.status(stateStore.ready ? 200 : 503).json({
-      ready: stateStore.ready,
+    const durableStateReady = stateStore.ready && (!policy.requireDurableState || stateStore.durable === true);
+    res.status(durableStateReady ? 200 : 503).json({
+      ready: durableStateReady,
       service: "property-os-mcp",
       version: "0.2.0",
       protocolVersion: "2025-11-25",
       transport: "streamable-http",
       sessionMode: "stateless-json",
       authMode: policy.authMode,
-      tenantMode: policy.authMode === "oidc" ? "verified-claim" : "single-tenant-token",
+      tenantMode: policy.authMode === "oidc" ? "tenant-bound-verified-claim" : "single-tenant-token",
+      durableStateRequired: policy.requireDurableState,
       stateStore,
       agentRuntime,
       policyVersion: "property-os-authority.v2",

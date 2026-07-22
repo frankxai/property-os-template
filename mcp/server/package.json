@@ -14,11 +14,12 @@
     "test:agent": "node scripts/agent-runtime.mjs",
     "test:adversarial": "node scripts/adversarial.mjs",
     "test:http": "node scripts/http-smoke.mjs",
+    "test:oidc": "node scripts/oidc-auth-smoke.mjs",
     "test:activation": "node scripts/remote-activation-smoke.mjs",
     "activation:verify": "node scripts/remote-activation.mjs",
     "test:schema": "node scripts/schema-contract.mjs",
     "test:postgres": "node scripts/postgres-integration.mjs",
-    "test": "npm run smoke && npm run test:agent && npm run test:adversarial && npm run test:http && npm run test:activation && npm run test:schema && npm run test:postgres",
+    "test": "npm run smoke && npm run test:agent && npm run test:adversarial && npm run test:http && npm run test:oidc && npm run test:activation && npm run test:schema && npm run test:postgres",
     "audit": "npm audit --audit-level=moderate"
   },
   "dependencies": {

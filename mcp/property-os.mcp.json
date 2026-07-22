@@ -56,7 +56,7 @@
     "originValidation": "required-for-http",
     "hostValidation": "required-for-http",
     "auditLog": "required-for-tools",
-    "tenantIsolation": "verified-token-claim-or-single-tenant-service-token",
+    "tenantIsolation": "verified-token-claim-plus-deployment-allowlist-or-single-tenant-service-token",
     "ownerApproval": "server-issued-expiring-single-use-receipt",
     "controlledTransitions": "proposal-owner-decision-bound-receipt-exact-apply-audit-undo",
     "agentRuntime": "approved-evidence-structured-output-no-tools-owner-review",

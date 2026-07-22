@@ -31,10 +31,12 @@ assert.deepEqual(first.governance.blockedActions, [
   "change_price_or_availability"
 ]);
 assert.ok(first.environment.vercel.requiredKeys.includes("MCP_SERVER_ACCESS_TOKEN"));
+assert.ok(first.environment.vercel.requiredKeys.includes("MCP_SERVER_AUTH_MODE"));
 assert.ok(first.environment.vercel.requiredKeys.includes("OWNER_NOTIFICATION_WEBHOOK_SIGNING_SECRET"));
 assert.ok(first.environment.vercel.requiredKeys.includes("OWNER_NOTIFICATION_FALLBACK_SIGNING_SECRET"));
 assert.ok(first.environment.vercel.requiredKeys.includes("OWNER_NOTIFICATION_WORKER_TOKEN"));
 assert.ok(first.environment.railway.requiredKeys.includes("PROPERTY_OS_MCP_AUTH_TOKEN"));
+assert.ok(first.environment.railway.requiredKeys.includes("PROPERTY_OS_MCP_ALLOWED_TENANTS"));
 assert.ok(first.environment.operator.requiredKeys.includes("PROPERTY_OS_REMOTE_MCP_TOKEN"));
 assert.ok(first.commands.some((entry) => entry.command === "npm run activation:verify"));
 assert.ok(first.commands.some((entry) => entry.command === "npm run notification:smoke"));
@@ -43,12 +45,14 @@ assert.ok(first.commands.some((entry) => entry.command === "npm run weekly:smoke
 assert.ok(first.commands.some((entry) => entry.command === "npm run weekly:visual"));
 assert.ok(first.migrations.some((entry) => entry.path === "db/002-notification-lifecycle.sql" && entry.target === "portal-db"));
 assert.ok(first.migrations.some((entry) => entry.path === "db/003-weekly-owner-review.sql" && entry.target === "portal-db"));
-assert.equal(first.migrations.length, 6);
-assert.equal(first.commands.length, 18);
+assert.ok(first.migrations.some((entry) => entry.path === "db/004-tenant-oidc.sql" && entry.target === "portal-db"));
+assert.equal(first.migrations.length, 7);
+assert.equal(first.commands.length, 19);
 assert.equal(first.phaseGates.length, 9);
 assert.ok(first.acceptance.some((entry) => entry.id === "owner-review" && entry.ownerApproval));
 assert.ok(first.acceptance.some((entry) => entry.id === "urgent-route" && /fallback/i.test(entry.action)));
 assert.ok(first.acceptance.some((entry) => entry.id === "weekly-loop" && /unmeasured/i.test(entry.action)));
+assert.ok(first.acceptance.some((entry) => entry.id === "identity-chain" && /foreign tenant/i.test(entry.action)));
 assert.ok(first.successMetrics.some((metric) => metric.id === "unauthorized-actions" && /governed product action surface/i.test(metric.evidence)));
 assert.equal(first.successMetrics.every((metric) => metric.status === "unmeasured"), true);
 
@@ -60,6 +64,25 @@ await assert.rejects(
   () => createInstallPlan({ ...sample, apiToken: "sk_test_value_that_must_not_be_logged" }),
   /must not include sensitive field/
 );
+
+const agency = await createInstallPlan({
+  ...sample,
+  edition: "agency-platform",
+  operatorMode: "partner-led",
+  deployment: { ...sample.deployment, authMode: "oidc" },
+  commercial: { offerId: "agency-workspace", supportTier: "implementation" }
+});
+assert.ok(agency.environment.vercel.requiredKeys.includes("BETTER_AUTH_SECRET"));
+assert.ok(agency.environment.vercel.requiredKeys.includes("PROPERTY_OS_OIDC_AUTHORIZATION_URL"));
+assert.ok(agency.environment.vercel.requiredKeys.includes("PROPERTY_OS_OIDC_TOKEN_URL"));
+assert.ok(agency.environment.vercel.requiredKeys.includes("PROPERTY_OS_OIDC_JWKS_URL"));
+assert.ok(agency.environment.vercel.requiredKeys.includes("MCP_OIDC_CLIENT_SECRET"));
+assert.ok(!agency.environment.vercel.requiredKeys.includes("MCP_SERVER_ACCESS_TOKEN"));
+assert.ok(agency.environment.operator.requiredKeys.includes("PROPERTY_OS_EXPECTED_OIDC_SUBJECTS"));
+assert.ok(agency.environment.railway.requiredKeys.includes("PROPERTY_OS_MCP_ALLOWED_TENANTS"));
+assert.ok(!agency.environment.railway.requiredKeys.includes("PROPERTY_OS_MCP_AUTH_TOKEN"));
+assert.ok(agency.commands.some((entry) => entry.command === "npm run identity:db:smoke"));
+assert.equal(agency.commands.length, 20);
 
 await assert.rejects(
   () =>

@@ -32,10 +32,12 @@ const { listener, port } = await startPropertyOsHttpServer({
   authMode: "static",
   staticToken: token,
   defaultTenantId: "activation-org",
+  insecureLocal: true,
   actorId: "activation-owner",
   actorRole: "owner",
   allowedHosts: ["127.0.0.1"],
   allowedOrigins: [origin],
+  allowedTenants: ["activation-org"],
   engine,
   repository
 });
