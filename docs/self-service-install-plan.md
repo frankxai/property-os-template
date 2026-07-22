@@ -46,7 +46,7 @@ OIDC in a plan is an architecture requirement, not a claim that the current port
 - Vercel portal, Railway MCP, model runtime, and two logical database boundaries
 - draft-only authority and the six blocked v1 actions
 - unresolved owner decisions and provider recommendations
-- eight phase gates with exact evidence requirements, including the owner-notification lifecycle
+- nine phase gates with exact evidence requirements, including owner notifications and weekly measurement
 - environment key names grouped by host, never values
 - migration targets and verification commands
 - owner acceptance steps
@@ -61,11 +61,11 @@ Use two separate logical Postgres databases with tenant isolation, ideally with 
 
 | Host | Logical database | Owns |
 | --- | --- | --- |
-| Vercel portal | `portal-db` | inquiries, support, portal approvals, notification outbox and events, portal audit, operational state |
+| Vercel portal | `portal-db` | inquiries, support, portal approvals, notification outbox and events, weekly reviews and metric observations, portal audit, operational state |
 | Railway MCP | `control-plane-db` | missions, approved evidence, structured model receipts, owner reviews, controlled transitions |
 
-The portal and MCP currently have different runtime contracts for similarly named records. Never point their `DATABASE_URL` values at the same logical database. They interoperate through authenticated MCP tools, which keeps the authority and audit boundary explicit.
+The portal and MCP currently have different runtime contracts for similarly named records. Never point their `DATABASE_URL` values at the same logical database. They interoperate through authenticated MCP tools, which keeps the authority and audit boundary explicit. Existing portal databases apply `db/002-notification-lifecycle.sql` and `db/003-weekly-owner-review.sql` in order.
 
 ## Handoff Rule
 
-Attach the config hash and plan hash to the implementation issue or commercial statement of work. At handoff, replace planned gates with host-generated proof references; do not edit a generated plan to say a gate passed. The live evidence set must include portal install proof, live portal RLS smoke, Railway readiness, remote activation, rejected synthetic owner review, signed primary and fallback notification receipts, idempotent urgent acknowledgement, visual QA, weekly review, and signed owner acceptance.
+Attach the config hash and plan hash to the implementation issue or commercial statement of work. At handoff, replace planned gates with host-generated proof references; do not edit a generated plan to say a gate passed. The live evidence set must include portal install proof, live portal RLS smoke, Railway readiness, remote activation, rejected synthetic owner review, signed primary and fallback notification receipts, idempotent urgent acknowledgement, visual QA, five weekly metric observations with honest `unmeasured` states, and signed owner acceptance.

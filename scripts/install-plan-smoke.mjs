@@ -39,9 +39,17 @@ assert.ok(first.environment.operator.requiredKeys.includes("PROPERTY_OS_REMOTE_M
 assert.ok(first.commands.some((entry) => entry.command === "npm run activation:verify"));
 assert.ok(first.commands.some((entry) => entry.command === "npm run notification:smoke"));
 assert.ok(first.commands.some((entry) => entry.command === "npm run notification:visual"));
+assert.ok(first.commands.some((entry) => entry.command === "npm run weekly:smoke"));
+assert.ok(first.commands.some((entry) => entry.command === "npm run weekly:visual"));
 assert.ok(first.migrations.some((entry) => entry.path === "db/002-notification-lifecycle.sql" && entry.target === "portal-db"));
+assert.ok(first.migrations.some((entry) => entry.path === "db/003-weekly-owner-review.sql" && entry.target === "portal-db"));
+assert.equal(first.migrations.length, 6);
+assert.equal(first.commands.length, 18);
+assert.equal(first.phaseGates.length, 9);
 assert.ok(first.acceptance.some((entry) => entry.id === "owner-review" && entry.ownerApproval));
 assert.ok(first.acceptance.some((entry) => entry.id === "urgent-route" && /fallback/i.test(entry.action)));
+assert.ok(first.acceptance.some((entry) => entry.id === "weekly-loop" && /unmeasured/i.test(entry.action)));
+assert.ok(first.successMetrics.some((metric) => metric.id === "unauthorized-actions" && /governed product action surface/i.test(metric.evidence)));
 assert.equal(first.successMetrics.every((metric) => metric.status === "unmeasured"), true);
 
 const serialized = JSON.stringify(first);

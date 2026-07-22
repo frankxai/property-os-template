@@ -17,6 +17,7 @@ Use `property-portal-template` when the owner wants a renter-facing website.
 11. Check `/api/runtime/snapshot` and `/admin/runtime` for queue, adapter, notification, and audit posture.
 12. Use `/api/listing-dry-run` for integration payload review before any live publishing work.
 13. Run `npm run notification:smoke`, then inspect `/admin/notifications`; a local pass proves lifecycle logic but not live provider delivery.
+14. Run `npm run weekly:smoke` and `npm run weekly:visual`, then inspect `/admin/ops`; local proof does not replace one live tenant-scoped owner review.
 
 ## Runtime Adapter
 
@@ -49,12 +50,14 @@ Production database install order:
 1. Apply portal `db/schema.sql` to the portal logical database.
 2. Apply portal `db/rls.sql` there so Postgres enforces tenant isolation through `property_os.organization_id`.
 3. Apply portal `db/002-notification-lifecycle.sql` when upgrading an existing portal database; fresh installs already receive those tables through `db/schema.sql` and policies through `db/rls.sql`.
-4. Seed `db/seed-sample.sql` for local smoke or a private owner seed for the real install.
-5. Set `PROPERTY_OS_ORG_ID` to the seeded organization.
-6. Run `npm run db:rls:smoke` against the live `DATABASE_URL`.
-7. Run `npm run notification:smoke`; then prove signed primary delivery, fallback after the acknowledgement timeout, and idempotent acknowledgement against the selected provider.
-8. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
-9. Check `/api/install/proof-packet`, `/api/runtime/snapshot`, `/admin/setup`, `/admin/runtime`, and `/admin/notifications`.
+4. Apply portal `db/003-weekly-owner-review.sql` after the notification migration when upgrading; it binds each metric row to a review in the same tenant.
+5. Seed `db/seed-sample.sql` for local smoke or a private owner seed for the real install.
+6. Set `PROPERTY_OS_ORG_ID` to the seeded organization.
+7. Run `npm run db:rls:smoke` against the live `DATABASE_URL`.
+8. Run `npm run notification:smoke`; then prove signed primary delivery, fallback after the acknowledgement timeout, and idempotent acknowledgement against the selected provider.
+9. Run `npm run weekly:smoke` and `npm run weekly:visual`; then complete one live review and preserve all five observations.
+10. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
+11. Check `/api/install/proof-packet`, `/api/runtime/snapshot`, `/admin/setup`, `/admin/runtime`, `/admin/notifications`, and `/admin/ops`.
 
 The portal issue templates include install support, integration requests, safety review, and portal QA. Use them as the public-safe support layer for community forks and partner installs.
 

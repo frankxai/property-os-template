@@ -20,6 +20,7 @@ Help owners and agencies launch a cleaner, safer, more premium property operatin
 - security, authority, RLS, runtime, and preview proof packet
 - schema-valid install config, source config hash, and stable install plan hash
 - signed owner-notification primary, fallback, and acknowledgement proof
+- first weekly owner review with five source-labeled metric observations and Keep / Change / Stop decisions
 
 ## Offer Ladder
 
@@ -60,7 +61,7 @@ Do not promise:
 - `/admin/implementation` readiness score and MCP readiness snapshot
 - visual QA notes
 - first listing drafts
-- weekly review checklist
+- weekly review evidence with explicit `met`, `not-met`, and `unmeasured` states
 - named data controller, support owner, incident contact, and rollback owner
 - acceptance record showing what is live, manual, blocked, and deferred
 - provider receipts proving the urgent route; local mock output alone is not delivery evidence
@@ -72,7 +73,7 @@ Do not promise:
 3. Generate the secret-free install plan and record both hashes in the implementation issue.
 4. Install approved facts and the portal in preview.
 5. Run security, privacy, database isolation, authority, signed notification lifecycle, performance, accessibility, and visual QA gates.
-6. Train the owner on decisions, urgent escalation, weekly review, and service limitations.
+6. Train the owner on decisions, urgent escalation, weekly review, evidence sources, `unmeasured` states, and service limitations.
 7. Handoff evidence, retention policy, incident path, support scope, and 30-day measurement plan.
 
 Partners may customize brand, onboarding, integrations, analytics, and managed operations. They must not remove attribution required by third-party licenses, weaken safety gates, imply legal compliance, or claim autonomous external action that is not actually receipt-controlled and reversible.

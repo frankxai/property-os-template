@@ -63,19 +63,21 @@ Before owner handoff, run `npm run install:proof` in the portal repo and review 
 3. Apply the portal `db/schema.sql` to the portal database.
 4. Apply the portal `db/rls.sql` to the portal database.
 5. Apply `db/002-notification-lifecycle.sql` for an upgrade; fresh schema installs already include the notification tables.
-6. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
-7. Run `npm run db:rls:smoke` against the live database.
-8. Configure independently signed primary and fallback webhook routes plus the scoped worker token.
-9. Run `npm run notification:smoke`, then collect live provider delivery, fallback, payload-hash, and acknowledgement receipts.
-10. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
-11. Turn on runtime database and verify `/admin/runtime` and `/admin/notifications`.
-12. Log inquiries, support, approvals, agent runs, listing dry-runs, notification events, and audit events.
-13. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order to the separate control-plane database.
-14. Deploy MCP server in mission, structured-draft, owner-review, and dry-run mode.
-15. Run one approved-evidence agent draft and record an owner review outcome.
-16. Verify owner approval and notification acknowledgement queues.
-17. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, notification smoke, and visual QA.
-18. Keep listing publication manual.
+6. Apply `db/003-weekly-owner-review.sql` after the notification migration for an upgrade.
+7. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
+8. Run `npm run db:rls:smoke` against the live database.
+9. Configure independently signed primary and fallback webhook routes plus the scoped worker token.
+10. Run `npm run notification:smoke`, then collect live provider delivery, fallback, payload-hash, and acknowledgement receipts.
+11. Run `npm run weekly:smoke` and `npm run weekly:visual`, then complete one live review without converting `unmeasured` evidence into a pass.
+12. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
+13. Turn on runtime database and verify `/admin/runtime`, `/admin/notifications`, and `/admin/ops`.
+14. Log inquiries, support, approvals, agent runs, listing dry-runs, notification events, weekly observations, and audit events.
+15. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order to the separate control-plane database.
+16. Deploy MCP server in mission, structured-draft, owner-review, and dry-run mode.
+17. Run one approved-evidence agent draft and record an owner review outcome.
+18. Verify owner approval and notification acknowledgement queues.
+19. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, notification smoke, weekly smoke, weekly visual, and visual QA.
+20. Keep listing publication manual.
 
 ## Blocked Until Proven
 

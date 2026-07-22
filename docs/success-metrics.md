@@ -36,11 +36,11 @@
 
 | Outcome | Initial target | Evidence |
 | --- | --- | --- |
-| Owner time | Weekly operating review under 30 minutes | timestamped weekly review receipt |
-| Renter self-service | At least 70% of repeated questions covered by approved knowledge | article coverage and escalation analytics |
-| Vacancy readiness | Owner-reviewed draft ready 30 days before known exit | availability timeline and draft receipt |
-| Urgent support | Owner notification acknowledged in under 5 minutes | notification provider and owner receipt |
+| Owner time | Weekly operating review in 30 minutes or less | server-timestamped owner-review-time observation |
+| Renter self-service | At least 70% of repeated questions covered by approved knowledge | owner-entered self-service-coverage observation |
+| Vacancy readiness | Owner-reviewed draft ready 30 days before known exit | owner-entered vacancy-readiness observation |
+| Urgent support | Owner notification acknowledged in under 5 minutes | server-derived notification-ledger observation |
 | Partner activation | First sample property installed in under 60 minutes | install proof packet |
-| Safety | Zero unauthorized consequential actions | blocked-action and controlled-transition audit |
+| Safety | Zero unauthorized consequential actions | system-policy observation bounded to the governed product action surface |
 
-Targets are product hypotheses until measured on the brother pilot and at least three independent installs. Publish measured baselines and confidence intervals before making comparative market claims.
+Targets are product hypotheses until measured on the brother pilot and at least three independent installs. Every weekly observation is `met`, `not-met`, or `unmeasured`; absence of evidence is never a pass. Publish measured baselines and confidence intervals before making comparative market claims.

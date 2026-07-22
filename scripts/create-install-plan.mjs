@@ -247,6 +247,13 @@ function phaseGates(config, unresolved) {
       evidence: ["signed primary receipt", "bounded retry receipt", "signed fallback receipt", "idempotent owner acknowledgement"]
     },
     {
+      id: "weekly-measurement",
+      label: "Weekly owner evidence",
+      status: "configuration-required",
+      ownerGate: true,
+      evidence: ["server-timestamped review", "five metric observations", "Keep Change Stop decisions", "zero external actions receipt"]
+    },
+    {
       id: "portal-preview",
       label: "Vercel portal preview",
       status: "proof-required",
@@ -258,7 +265,7 @@ function phaseGates(config, unresolved) {
       label: "Owner pilot acceptance",
       status: "waiting-owner",
       ownerGate: true,
-      evidence: ["rejected synthetic agent review", "urgent notification receipt", "weekly review receipt", "signed acceptance record"]
+      evidence: ["rejected synthetic agent review", "urgent notification receipt", "five weekly metric observations", "signed acceptance record"]
     }
   ];
 }
@@ -269,28 +276,28 @@ function successMetrics() {
       id: "owner-review-time",
       hypothesis: "The weekly operating review is concise enough for routine owner use.",
       target: "under 30 minutes",
-      evidence: "timestamped weekly review receipt",
+      evidence: "server-timestamped owner-review-time observation",
       status: "unmeasured"
     },
     {
       id: "self-service-coverage",
       hypothesis: "Approved knowledge answers most recurring renter questions without owner intervention.",
       target: "at least 70 percent",
-      evidence: "article coverage and escalation analytics",
+      evidence: "owner-entered self-service-coverage observation",
       status: "unmeasured"
     },
     {
       id: "vacancy-readiness",
       hypothesis: "A channel-ready listing draft exists before a known vacancy begins.",
       target: "30 days before known exit",
-      evidence: "availability timeline and owner-reviewed draft receipt",
+      evidence: "owner-entered vacancy-readiness observation",
       status: "unmeasured"
     },
     {
       id: "urgent-acknowledgement",
       hypothesis: "The approved urgent route reaches the accountable owner promptly.",
       target: "under 5 minutes",
-      evidence: "notification provider and owner acknowledgement receipt",
+      evidence: "server-derived urgent-acknowledgement observation backed by the notification ledger",
       status: "unmeasured"
     },
     {
@@ -304,7 +311,7 @@ function successMetrics() {
       id: "unauthorized-actions",
       hypothesis: "No agent can perform a consequential external action in v1.",
       target: "zero",
-      evidence: "blocked-action and controlled-transition audit",
+      evidence: "system-policy observation bounded to the governed product action surface",
       status: "unmeasured"
     }
   ];
@@ -370,7 +377,7 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
         provider: "managed-postgres",
         logicalDatabase: "portal-db",
         isolation: "tenant-rls",
-        purpose: "Inquiries, support, portal approvals, notification outbox and events, operational audit, and public-facing runtime state."
+        purpose: "Inquiries, support, portal approvals, notification outbox and events, weekly owner reviews and metric observations, operational audit, and public-facing runtime state."
       },
       controlPlaneLedger: {
         provider: "managed-postgres",
@@ -422,13 +429,20 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       },
       {
         order: 4,
+        repository: "property-portal-template",
+        path: "db/003-weekly-owner-review.sql",
+        target: "portal-db",
+        proof: "weekly schema, tenant-matching foreign key, and forced-RLS receipt"
+      },
+      {
+        order: 5,
         repository: "property-os-template",
         path: "mcp/server/db/001-control-plane.sql",
         target: "control-plane-db",
         proof: "control-plane schema receipt"
       },
       {
-        order: 5,
+        order: 6,
         repository: "property-os-template",
         path: "mcp/server/db/002-governed-agent-runtime.sql",
         target: "control-plane-db",
@@ -451,6 +465,8 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       { repository: "property-portal-template", phase: "handoff", command: "npm run install:proof", proof: "secret-free install proof packet" },
       { repository: "property-portal-template", phase: "preview-gates", command: "npm run visual:qa", proof: "desktop and mobile visual evidence passes" },
       { repository: "property-portal-template", phase: "preview-gates", command: "npm run notification:visual", proof: "desktop and mobile notification console evidence passes" },
+      { repository: "property-portal-template", phase: "weekly-measurement", command: "npm run weekly:smoke", proof: "idempotent review, five honest metrics, immutable replay, and zero external actions pass" },
+      { repository: "property-portal-template", phase: "weekly-measurement", command: "npm run weekly:visual", proof: "desktop and mobile weekly evidence renders without overflow, clipping, or misleading current-week state" },
       { repository: "property-portal-template", phase: "security", command: "npm run audit", proof: "dependency audit passes" }
     ],
     acceptance: [
@@ -461,7 +477,7 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       { id: "owner-review", action: "Create one evidence-grounded draft and reject it in the owner workbench.", evidence: "model, evidence, output, and review hashes", ownerApproval: true },
       { id: "urgent-route", action: "Trigger a synthetic urgent request; prove signed primary delivery, bounded retry, fallback after the acknowledgement timeout, and idempotent owner acknowledgement.", evidence: "provider delivery, fallback, payload hash, and owner acknowledgement receipts", ownerApproval: true },
       { id: "portal-preview", action: "Inspect the exact Vercel preview on desktop and mobile before production.", evidence: "preview URL and visual QA evidence", ownerApproval: true },
-      { id: "weekly-loop", action: "Run one timed weekly owner review and record unresolved work.", evidence: "timestamped weekly review receipt", ownerApproval: true },
+      { id: "weekly-loop", action: "Run one timed weekly owner review, preserve met, not-met, and unmeasured states, and record Keep, Change, and Stop decisions.", evidence: "five tenant-scoped metric observations and zero external actions receipt", ownerApproval: true },
       { id: "launch-record", action: "Sign what is live, manual, blocked, deferred, supported, and reversible.", evidence: "owner acceptance record", ownerApproval: true }
     ],
     successMetrics: successMetrics(),
