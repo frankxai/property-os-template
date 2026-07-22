@@ -16,6 +16,7 @@
     "mcp:smoke": "npm --prefix mcp/server run smoke",
     "mcp:test": "npm --prefix mcp/server test",
     "mcp:http": "npm --prefix mcp/server run start:http",
+    "audit": "npm --prefix mcp/server run audit",
     "privacy": "node scripts/privacy-scan.mjs"
   }
 }

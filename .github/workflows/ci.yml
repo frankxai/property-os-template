@@ -25,3 +25,5 @@ jobs:
         run: npm ci --prefix mcp/server
       - name: Validate template
         run: npm run validate
+      - name: Audit dependencies
+        run: npm run audit

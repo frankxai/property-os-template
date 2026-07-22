@@ -5,6 +5,7 @@ import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middlew
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { blockedV1Tools, createPropertyOsEngine } from "./domain.mjs";
 import { createTokenVerifier, loadHttpPolicy, protectedResourceMetadata, validateOrigin } from "./auth.mjs";
+import { createRepositoryFromEnv } from "./repository.mjs";
 import { createPropertyOsServer } from "./server-factory.mjs";
 
 function jsonRpcError(res, status, code, message) {
@@ -15,16 +16,18 @@ export function createPropertyOsHttpApp(options = {}) {
   const policy = options.policy ?? loadHttpPolicy(options.env ?? process.env, options);
   const app = createMcpExpressApp({ host: policy.host, allowedHosts: policy.allowedHosts });
   const verifier = createTokenVerifier(policy);
-  const engine = options.engine ?? createPropertyOsEngine();
+  const repository = options.repository ?? (options.engine ? options.engine.repository : createRepositoryFromEnv(options.env ?? process.env));
+  const engine = options.engine ?? createPropertyOsEngine({ repository });
   const resourceMetadataUrl = new URL("/.well-known/oauth-protected-resource/mcp", policy.publicUrl).toString();
 
   app.get("/healthz", (_req, res) => {
     res.json({ status: "ok", service: "property-os-mcp", version: "0.2.0" });
   });
 
-  app.get("/readyz", (_req, res) => {
-    res.json({
-      ready: true,
+  app.get("/readyz", async (_req, res) => {
+    const stateStore = await repository.health();
+    res.status(stateStore.ready ? 200 : 503).json({
+      ready: stateStore.ready,
       service: "property-os-mcp",
       version: "0.2.0",
       protocolVersion: "2025-11-25",
@@ -32,6 +35,7 @@ export function createPropertyOsHttpApp(options = {}) {
       sessionMode: "stateless-json",
       authMode: policy.authMode,
       tenantMode: policy.authMode === "oidc" ? "verified-claim" : "single-tenant-token",
+      stateStore,
       policyVersion: "property-os-authority.v2",
       blockedActionCount: blockedV1Tools.length
     });
@@ -85,12 +89,12 @@ export function createPropertyOsHttpApp(options = {}) {
     return jsonRpcError(res, 405, -32000, "Stateless sessions cannot be deleted.");
   });
 
-  return { app, policy };
+  return { app, policy, engine, repository };
 }
 
 export async function startPropertyOsHttpServer(options = {}) {
   const port = Number(options.port ?? process.env.PORT ?? 8787);
-  const { app, policy } = createPropertyOsHttpApp({ ...options, port });
+  const { app, policy, repository } = createPropertyOsHttpApp({ ...options, port });
   const listener = await new Promise((resolve, reject) => {
     const server = app.listen(port, policy.host, () => resolve(server));
     server.on("error", reject);
@@ -98,12 +102,15 @@ export async function startPropertyOsHttpServer(options = {}) {
   const address = listener.address();
   const actualPort = typeof address === "object" && address ? address.port : port;
   console.error(`Property OS MCP v0.2.0 ready on ${policy.host}:${actualPort}`);
-  return { listener, policy, port: actualPort };
+  return { listener, policy, port: actualPort, repository };
 }
 
 if (fileURLToPath(import.meta.url) === process.argv[1]) {
-  const { listener } = await startPropertyOsHttpServer();
-  const shutdown = () => listener.close(() => process.exit(0));
+  const { listener, repository } = await startPropertyOsHttpServer();
+  const shutdown = async () => {
+    await repository.close?.();
+    listener.close(() => process.exit(0));
+  };
   process.once("SIGINT", shutdown);
   process.once("SIGTERM", shutdown);
 }

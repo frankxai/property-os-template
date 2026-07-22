@@ -180,4 +180,36 @@ await expectError(
   "RECEIPT_EXPIRED"
 );
 
+const concurrent = createPropertyOsEngine();
+const concurrentProposal = (await concurrent.executeTool("propose_controlled_transition", {
+  organizationId: "org-a",
+  operation: "mark-draft-reviewed",
+  resourceId: "listing-draft-concurrent",
+  baseVersionHash: "concurrent-base-v1",
+  payloadHash: "concurrent-payload-v2",
+  summary: "Concurrent retry proof"
+}, owner)).structuredContent;
+const concurrentDecision = (await concurrent.executeTool("record_owner_decision", {
+  organizationId: "org-a",
+  proposalId: concurrentProposal.id,
+  decision: "approve"
+}, owner)).structuredContent;
+const concurrentArgs = {
+  organizationId: "org-a",
+  proposalId: concurrentProposal.id,
+  approvalReceiptId: concurrentDecision.approvalReceipt.id,
+  idempotencyKey: "concurrent-exact-retry"
+};
+const concurrentResults = await Promise.all([
+  concurrent.executeTool("apply_approved_transition", concurrentArgs, owner),
+  concurrent.executeTool("apply_approved_transition", concurrentArgs, owner)
+]);
+const concurrentBodies = concurrentResults.map((result) => result.structuredContent);
+if (new Set(concurrentBodies.map((result) => result.transitionId)).size !== 1) {
+  throw new Error("Concurrent exact retries created more than one transition.");
+}
+if (concurrentBodies.filter((result) => result.replayed).length !== 1) {
+  throw new Error("Concurrent exact retries must return one apply and one replay receipt.");
+}
+
 console.log("Property OS controlled-transition adversarial tests passed.");

@@ -13,12 +13,15 @@
     "smoke": "node scripts/smoke.mjs",
     "test:adversarial": "node scripts/adversarial.mjs",
     "test:http": "node scripts/http-smoke.mjs",
-    "test": "npm run smoke && npm run test:adversarial && npm run test:http",
+    "test:schema": "node scripts/schema-contract.mjs",
+    "test:postgres": "node scripts/postgres-integration.mjs",
+    "test": "npm run smoke && npm run test:adversarial && npm run test:http && npm run test:schema && npm run test:postgres",
     "audit": "npm audit --audit-level=moderate"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
     "jose": "^6.2.4",
+    "postgres": "^3.4.9",
     "zod": "^4.4.3"
   },
   "overrides": {
@@ -26,5 +29,8 @@
   },
   "engines": {
     "node": ">=20.10.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4"
   }
 }

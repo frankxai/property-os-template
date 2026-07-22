@@ -19,7 +19,7 @@ npm test
 npm audit --audit-level=moderate
 ```
 
-The tests use no secret values and cover SDK interoperability, HTTP auth and Origin denial, tenant isolation, forged and expired receipts, single-use consumption, idempotent replay, privacy redaction, and blocked external actions.
+The tests use no secret values and cover SDK interoperability, HTTP auth and Origin denial, tenant isolation, forged and expired receipts, concurrent single-use consumption, idempotent replay, privacy redaction, blocked external actions, and an embedded Postgres execution of the real migration and repository.
 
 ## Auth Modes
 
@@ -39,4 +39,6 @@ The controlled transition proof supports only `mark-draft-reviewed`:
 
 Approval does not apply content. Apply requires an exact, active, actor-bound, tenant-bound, short-lived, single-use receipt plus an idempotency key. All renter messaging, publishing, dispatch, applicant, access, pricing, and availability actions remain blocked.
 
-The in-memory repository proves protocol and policy behavior. Replace it with the portal Postgres transition tables and one atomic transaction before production state changes.
+Without `DATABASE_URL`, the server uses memory for local protocol proofs only. With `DATABASE_URL`, it uses the durable Postgres repository in `src/repository.mjs`. Apply `db/001-control-plane.sql` before deployment. `/readyz` returns `503` when Postgres is unreachable or the control-plane tables are missing.
+
+The durable path forces tenant RLS, locks accepted resource versions, serializes each idempotency key with a transaction-scoped advisory lock, consumes approval receipts atomically, and writes audit evidence in the same transaction. Run `npm run test:postgres` for an embedded non-superuser RLS proof, then repeat the live database gate against the target managed Postgres before production.

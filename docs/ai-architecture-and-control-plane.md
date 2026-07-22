@@ -44,8 +44,14 @@ External listing publication, renter messaging, vendor dispatch, applicant decis
 - static bearer token for a private single-tenant pilot.
 - OIDC JWT verification with issuer, audience, JWKS, tenant claim, role, and scopes for production.
 - short-lived, actor-bound, single-use approval receipts for one internal proof transition.
+- memory adapter for local protocol demonstrations; Postgres is the authoritative hosted adapter when `DATABASE_URL` is set.
+- forced tenant RLS, accepted-state `resource_versions`, transaction-scoped idempotency locks, atomic receipt consumption, and same-transaction audit evidence.
 - `/healthz`, `/readyz`, and OAuth protected-resource metadata.
-- adversarial tests for tenant mismatch, forged/expired/consumed receipts, stale state, idempotency conflict, privacy redaction, and blocked external actions.
+- `/readyz` fails when configured Postgres is unavailable or unmigrated.
+- adversarial tests for tenant mismatch, forged/expired/consumed receipts, stale state, concurrent replay, idempotency conflict, privacy redaction, and blocked external actions.
+- embedded Postgres proof executes the production migration under a non-superuser role and verifies RLS, durable mission state, proposal, receipt, apply, version, audit, and replay behavior.
+
+The portal calls `create_agent_mission` through the authenticated MCP client whenever MCP is configured. Invalid configuration or transport failure returns `503`; it does not create a second local mission or notify the owner as if durable work succeeded.
 
 ## Durable Work
 

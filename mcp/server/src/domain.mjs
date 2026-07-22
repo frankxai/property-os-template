@@ -1,4 +1,5 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
+import { MemoryPropertyOsRepository } from "./repository.mjs";
 
 const EXTERNAL_ACTIONS = new Set([
   "publish_listing",
@@ -65,10 +66,6 @@ function clean(value, maxLength = 1200) {
   return value.replace(/[<>]/g, "").replace(/\s+/g, " ").trim().slice(0, maxLength);
 }
 
-function digest(value) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
 function makeId(prefix) {
   return `${prefix}-${randomUUID()}`;
 }
@@ -120,14 +117,10 @@ function output(value) {
 }
 
 export class PropertyOsEngine {
-  constructor({ now = () => new Date(), receiptTtlMs = 15 * 60 * 1000 } = {}) {
+  constructor({ now = () => new Date(), receiptTtlMs = 15 * 60 * 1000, repository = new MemoryPropertyOsRepository() } = {}) {
     this.now = now;
     this.receiptTtlMs = receiptTtlMs;
-    this.missions = new Map();
-    this.proposals = new Map();
-    this.receipts = new Map();
-    this.transitions = new Map();
-    this.currentVersions = new Map();
+    this.repository = repository;
   }
 
   getResource(uri) {
@@ -147,7 +140,7 @@ export class PropertyOsEngine {
 
     switch (name) {
       case "create_agent_mission":
-        return output(this.createMission(args, context));
+        return output(await this.createMission(args, context));
       case "create_inquiry_summary":
         return output(this.createInquirySummary(args, context));
       case "create_support_ticket_summary":
@@ -166,17 +159,17 @@ export class PropertyOsEngine {
       case "create_implementation_readiness_snapshot":
         return output(this.createReadinessSnapshot(args, context));
       case "propose_controlled_transition":
-        return output(this.proposeTransition(args, context));
+        return output(await this.proposeTransition(args, context));
       case "record_owner_decision":
-        return output(this.recordOwnerDecision(args, context));
+        return output(await this.recordOwnerDecision(args, context));
       case "apply_approved_transition":
-        return output(this.applyApprovedTransition(args, context));
+        return output(await this.applyApprovedTransition(args, context));
       default:
         failClosed(`Unknown tool: ${name}`, "UNKNOWN_TOOL");
     }
   }
 
-  createMission(args, context) {
+  async createMission(args, context) {
     requireScope(context, "property:draft");
     const tenantId = assertTenant(context, args.organizationId);
     const role = clean(args.role, 80);
@@ -195,10 +188,10 @@ export class PropertyOsEngine {
       stages: ["ground", "draft", "review", "owner-decision", "verify"],
       blockedActions: blockedV1Tools,
       createdBy: context.actorId,
-      createdAt: this.now().toISOString()
+      createdAt: this.now().toISOString(),
+      ownerAction: "Review the mission objective and evidence gate before any agent output is reused."
     };
-    this.missions.set(mission.id, mission);
-    return mission;
+    return this.repository.createMission(mission);
   }
 
   createInquirySummary(args, context) {
@@ -314,12 +307,12 @@ export class PropertyOsEngine {
       portalUrl: clean(args.portalUrl, 240) || "Set APP_BASE_URL and verify the owner control center.",
       runtimeMode: clean(args.runtimeMode, 80) || "demo",
       readyLayers: ["agent missions", "draft workflows", "owner decision boundary", "internal controlled-transition proof", "community fork kit"],
-      productionGates: ["OIDC resource-server mode", "Postgres transition repository", "RLS proof", "notifications", "backups and retention", "live visual QA"],
+      productionGates: ["OIDC resource-server mode", "managed Postgres migration and live RLS proof", "notifications", "backups and retention", "live visual QA"],
       blockedActions: blockedV1Tools
     };
   }
 
-  proposeTransition(args, context) {
+  async proposeTransition(args, context) {
     requireScope(context, "property:draft");
     const tenantId = assertTenant(context, args.organizationId);
     const operation = clean(args.operation, 120);
@@ -329,12 +322,6 @@ export class PropertyOsEngine {
     const resourceId = clean(args.resourceId, 180);
     const baseVersionHash = clean(args.baseVersionHash, 128);
     const payloadHash = clean(args.payloadHash, 128);
-    const stateKey = `${tenantId}:${resourceId}`;
-    const currentVersion = this.currentVersions.get(stateKey);
-    if (currentVersion && currentVersion !== baseVersionHash) {
-      failClosed("The proposal base version is stale.", "STALE_BASE_VERSION");
-    }
-    this.currentVersions.set(stateKey, baseVersionHash);
     const proposal = {
       id: makeId("proposal"),
       tenantId,
@@ -348,116 +335,42 @@ export class PropertyOsEngine {
       status: "pending",
       createdAt: this.now().toISOString()
     };
-    this.proposals.set(proposal.id, proposal);
+    await this.repository.proposeTransition(proposal);
     return { ...proposal, contentApplied: false, ownerAction: "Review the exact proposal, then record an approve or reject decision." };
   }
 
-  recordOwnerDecision(args, context) {
+  async recordOwnerDecision(args, context) {
     requireScope(context, "property:approve");
     requireOwner(context);
     assertTenant(context, args.organizationId);
-    const proposal = this.proposals.get(clean(args.proposalId, 180));
-    if (!proposal || proposal.tenantId !== context.tenantId) {
-      failClosed("Proposal not found in this tenant.", "PROPOSAL_NOT_FOUND");
-    }
-    if (proposal.status !== "pending") {
-      failClosed(`Proposal is already ${proposal.status}.`, "PROPOSAL_NOT_PENDING");
-    }
     const decision = clean(args.decision, 20);
-    if (decision === "reject") {
-      proposal.status = "rejected";
+    const result = await this.repository.recordDecision({
+      context,
+      proposalId: clean(args.proposalId, 180),
+      decision,
+      now: this.now(),
+      receiptTtlMs: this.receiptTtlMs
+    });
+    if (result.decision === "rejected") {
       return {
-        proposalId: proposal.id,
-        decision: "rejected",
-        contentApplied: false,
-        receiptIssued: false,
+        ...result,
         ownerAction: "Revise or stop the mission. Accepted state is unchanged."
       };
     }
-    if (decision !== "approve") {
-      failClosed("Decision must be approve or reject.", "INVALID_DECISION");
-    }
-    proposal.status = "approved";
-    const issuedAt = this.now();
-    const receipt = {
-      id: makeId("receipt"),
-      proposalId: proposal.id,
-      tenantId: proposal.tenantId,
-      actorId: context.actorId,
-      actorRole: context.actorRole,
-      operation: proposal.operation,
-      resourceId: proposal.resourceId,
-      baseVersionHash: proposal.baseVersionHash,
-      payloadHash: proposal.payloadHash,
-      scope: ["property:apply:internal"],
-      policyVersion: "property-os-authority.v2",
-      issuedAt: issuedAt.toISOString(),
-      expiresAt: new Date(issuedAt.getTime() + this.receiptTtlMs).toISOString(),
-      status: "active"
-    };
-    this.receipts.set(receipt.id, receipt);
     return {
-      proposalId: proposal.id,
-      decision: "approved",
-      contentApplied: false,
-      receiptIssued: true,
-      approvalReceipt: receipt,
+      ...result,
       ownerAction: "Apply the approved internal transition before the receipt expires. External actions remain blocked."
     };
   }
 
-  applyApprovedTransition(args, context) {
+  async applyApprovedTransition(args, context) {
     requireScope(context, "property:apply:internal");
     requireOwner(context);
     assertTenant(context, args.organizationId);
     const proposalId = clean(args.proposalId, 180);
     const receiptId = clean(args.approvalReceiptId, 180);
     const idempotencyKey = clean(args.idempotencyKey, 180);
-    const idempotencyState = this.transitions.get(`${context.tenantId}:${idempotencyKey}`);
-    if (idempotencyState) {
-      if (idempotencyState.proposalId !== proposalId || idempotencyState.receiptId !== receiptId) {
-        failClosed("Idempotency key was already used for a different transition.", "IDEMPOTENCY_CONFLICT");
-      }
-      return { ...idempotencyState.result, replayed: true };
-    }
-    const proposal = this.proposals.get(proposalId);
-    const receipt = this.receipts.get(receiptId);
-    if (!proposal || !receipt) failClosed("Proposal or approval receipt was not found.", "TRANSITION_NOT_FOUND");
-    if (proposal.tenantId !== context.tenantId || receipt.tenantId !== context.tenantId) failClosed("Cross-tenant transition denied.", "TENANT_MISMATCH");
-    if (proposal.status !== "approved") failClosed(`Proposal is ${proposal.status}.`, "PROPOSAL_NOT_APPROVED");
-    if (proposal.id !== receipt.proposalId || proposal.operation !== receipt.operation || proposal.resourceId !== receipt.resourceId || proposal.baseVersionHash !== receipt.baseVersionHash || proposal.payloadHash !== receipt.payloadHash) {
-      failClosed("Proposal and approval receipt binding failed.", "RECEIPT_BINDING_FAILED");
-    }
-    if (receipt.actorId !== context.actorId) failClosed("Approval receipt belongs to a different actor.", "ACTOR_MISMATCH");
-    if (receipt.policyVersion !== "property-os-authority.v2") failClosed("Approval receipt policy version is not accepted.", "POLICY_VERSION_MISMATCH");
-    if (!receipt.scope.includes("property:apply:internal")) failClosed("Approval receipt does not grant internal apply scope.", "RECEIPT_SCOPE_MISMATCH");
-    if (receipt.status !== "active") failClosed(`Approval receipt is ${receipt.status}.`, "RECEIPT_NOT_ACTIVE");
-    if (new Date(receipt.expiresAt).getTime() <= this.now().getTime()) {
-      receipt.status = "expired";
-      failClosed("Approval receipt expired.", "RECEIPT_EXPIRED");
-    }
-    const stateKey = `${context.tenantId}:${proposal.resourceId}`;
-    if (this.currentVersions.get(stateKey) !== proposal.baseVersionHash) failClosed("Target state changed after approval.", "STALE_BASE_VERSION");
-    const transitionId = makeId("transition");
-    const newVersionHash = digest(`${proposal.baseVersionHash}:${proposal.payloadHash}:${transitionId}`);
-    const result = {
-      transitionId,
-      proposalId,
-      approvalReceiptId: receiptId,
-      contentApplied: true,
-      operation: proposal.operation,
-      resourceId: proposal.resourceId,
-      newVersionHash,
-      auditEvent: "controlled_transition.applied",
-      undo: { supported: true, mode: "internal-sample-state", previousVersionHash: proposal.baseVersionHash },
-      replayed: false,
-      externalActionsPerformed: []
-    };
-    this.currentVersions.set(stateKey, newVersionHash);
-    proposal.status = "applied";
-    receipt.status = "consumed";
-    this.transitions.set(`${context.tenantId}:${idempotencyKey}`, { proposalId, receiptId, result });
-    return result;
+    return this.repository.applyTransition({ context, proposalId, receiptId, idempotencyKey, now: this.now() });
   }
 }
 
