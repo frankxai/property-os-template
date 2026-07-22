@@ -19,5 +19,9 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: mcp/server/package-lock.json
+      - name: Install MCP server dependencies
+        run: npm ci --prefix mcp/server
       - name: Validate template
         run: npm run validate
