@@ -1,12 +1,41 @@
 {
   "name": "@property-os/mcp-server",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "bin": {
-    "property-os-mcp": "./src/server.mjs"
+    "property-os-mcp": "./src/server.mjs",
+    "property-os-mcp-http": "./src/http.mjs"
   },
   "scripts": {
-    "smoke": "node scripts/smoke.mjs"
+    "start": "node src/server.mjs",
+    "start:http": "node src/http.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "test:agent": "node scripts/agent-runtime.mjs",
+    "test:adversarial": "node scripts/adversarial.mjs",
+    "test:http": "node scripts/http-smoke.mjs",
+    "test:oidc": "node scripts/oidc-auth-smoke.mjs",
+    "test:activation": "node scripts/remote-activation-smoke.mjs",
+    "activation:verify": "node scripts/remote-activation.mjs",
+    "test:schema": "node scripts/schema-contract.mjs",
+    "test:postgres": "node scripts/postgres-integration.mjs",
+    "test": "npm run smoke && npm run test:agent && npm run test:adversarial && npm run test:http && npm run test:oidc && npm run test:activation && npm run test:schema && npm run test:postgres",
+    "audit": "npm audit --audit-level=moderate"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ai": "^7.0.34",
+    "jose": "^6.2.4",
+    "postgres": "^3.4.9",
+    "zod": "^4.4.3"
+  },
+  "overrides": {
+    "@hono/node-server": "2.0.11"
+  },
+  "engines": {
+    "node": ">=20.10.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.4"
   }
 }

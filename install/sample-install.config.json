@@ -1,0 +1,37 @@
+{
+  "schema": "property-os.installConfig.v1",
+  "installationId": "sample-property-pilot",
+  "tenantId": "sample-org",
+  "edition": "community",
+  "operatorMode": "self-service",
+  "portfolio": {
+    "propertyCount": 1,
+    "unitCount": 1,
+    "primaryPropertySlug": "sample-residence"
+  },
+  "deployment": {
+    "portal": "vercel",
+    "controlPlane": "railway",
+    "database": "managed-postgres",
+    "region": "eu-central",
+    "dataResidencyReviewed": false,
+    "authMode": "static-private-pilot",
+    "modelProvider": "vercel-ai-gateway",
+    "storageProvider": "tbd",
+    "notificationProvider": "tbd"
+  },
+  "readiness": {
+    "ownerFactsApproved": false,
+    "mediaRightsApproved": false,
+    "publicAddressPolicyApproved": false,
+    "privacyRolesAssigned": false,
+    "retentionPolicyApproved": false,
+    "incidentOwnerAssigned": false,
+    "legalReviewComplete": false,
+    "notificationRouteApproved": false
+  },
+  "commercial": {
+    "offerId": "community",
+    "supportTier": "self-supported"
+  }
+}

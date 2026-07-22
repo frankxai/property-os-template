@@ -16,6 +16,11 @@ Help owners and agencies launch a cleaner, safer, more premium property operatin
 - implementation readiness cockpit
 - owner training
 - managed operations proposal
+- configured owner control center and first three bounded agent missions
+- security, authority, RLS, runtime, and preview proof packet
+- schema-valid install config, source config hash, and stable install plan hash
+- signed owner-notification primary, fallback, and acknowledgement proof
+- first weekly owner review with five source-labeled metric observations and Keep / Change / Stop decisions
 
 ## Offer Ladder
 
@@ -26,6 +31,8 @@ Help owners and agencies launch a cleaner, safer, more premium property operatin
 | Agency Workspace | boutique agency | setup plus license |
 | Integration Sprint | operator with proven workflow | scoped project |
 | Managed Ops | owner or agency | monthly retainer |
+
+Price with a discovery range, then quote from evidence. A practical starting hypothesis for early German-market pilots is EUR 1,500-3,500 for a one-property install, EUR 4,000-10,000 for a branded multi-property install, and EUR 250-1,500 per month for defined operations. These are positioning hypotheses, not market facts; validate willingness to pay, margin, and support load across the first five installs.
 
 ## Sales Script
 
@@ -47,10 +54,26 @@ Do not promise:
 
 ## Handoff Proof
 
+- generated plan remains `planned-not-proven` and is linked to live evidence rather than edited into a pass
 - validation output
 - privacy scan output
 - portal preview
 - `/admin/implementation` readiness score and MCP readiness snapshot
 - visual QA notes
 - first listing drafts
-- weekly review checklist
+- weekly review evidence with explicit `met`, `not-met`, and `unmeasured` states
+- named data controller, support owner, incident contact, and rollback owner
+- acceptance record showing what is live, manual, blocked, and deferred
+- provider receipts proving the urgent route; local mock output alone is not delivery evidence
+
+## Delivery Standard
+
+1. Discover the current owner, renter, listing, vacancy, and maintenance journey.
+2. Define the data boundary and exact owner authority before importing data.
+3. Generate the secret-free install plan and record both hashes in the implementation issue.
+4. Install approved facts and the portal in preview.
+5. Run security, privacy, database isolation, authority, signed notification lifecycle, performance, accessibility, and visual QA gates.
+6. Train the owner on decisions, urgent escalation, weekly review, evidence sources, `unmeasured` states, and service limitations.
+7. Handoff evidence, retention policy, incident path, support scope, and 30-day measurement plan.
+
+Partners may customize brand, onboarding, integrations, analytics, and managed operations. They must not remove attribution required by third-party licenses, weaken safety gates, imply legal compliance, or claim autonomous external action that is not actually receipt-controlled and reversible.

@@ -1,17 +1,24 @@
 {
   "name": "property-os",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP capability map for Property OS hosted agents and implementer workspaces.",
   "transports": ["stdio", "streamable-http"],
   "resources": [
     "property://profile/{propertyId}",
     "property://knowledge/{propertyId}",
     "property://listing-drafts/{propertyId}",
+    "property://contracts/authority",
+    "property://contracts/agent-team",
+    "property://contracts/success-metrics",
     "property://agent-runs/{organizationId}",
     "property://approvals/{organizationId}",
     "property://implementation-readiness/{organizationId}"
   ],
   "tools": [
+    "create_agent_mission",
+    "record_approved_evidence",
+    "run_agent_draft",
+    "record_agent_run_review",
     "create_inquiry_summary",
     "create_support_ticket_summary",
     "draft_listing",
@@ -20,7 +27,10 @@
     "create_sanitized_github_issue",
     "run_privacy_scan",
     "run_listing_dry_run",
-    "create_implementation_readiness_snapshot"
+    "create_implementation_readiness_snapshot",
+    "propose_controlled_transition",
+    "record_owner_decision",
+    "apply_approved_transition"
   ],
   "prompts": [
     "weekly_owner_review",
@@ -28,7 +38,9 @@
     "maintenance_triage",
     "integration_dry_run_review",
     "implementation_readiness_review",
-    "commercial_offer"
+    "commercial_offer",
+    "agent_mission_review",
+    "controlled_transition_review"
   ],
   "blockedV1Tools": [
     "publish_listing",
@@ -39,9 +51,15 @@
     "change_price_or_availability"
   ],
   "security": {
-    "auth": "required-for-http",
+    "auth": "static-bearer-for-private-pilot-or-oidc-jwt-for-production-http",
+    "protocolVersion": "2025-11-25",
+    "originValidation": "required-for-http",
+    "hostValidation": "required-for-http",
     "auditLog": "required-for-tools",
-    "tenantIsolation": "required",
-    "ownerApproval": "required-for-consequential-actions"
+    "tenantIsolation": "verified-token-claim-plus-deployment-allowlist-or-single-tenant-service-token",
+    "ownerApproval": "server-issued-expiring-single-use-receipt",
+    "controlledTransitions": "proposal-owner-decision-bound-receipt-exact-apply-audit-undo",
+    "agentRuntime": "approved-evidence-structured-output-no-tools-owner-review",
+    "externalActions": "blocked-in-v1"
   }
 }

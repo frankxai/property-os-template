@@ -1,6 +1,6 @@
 {
   "name": "property-os-template",
-  "version": "0.1.5",
+  "version": "0.2.0",
   "description": "Codex and Claude ready operating workspace for premium rental property workflows.",
   "license": "MIT",
   "private": true,
@@ -11,9 +11,19 @@
   },
   "homepage": "https://github.com/frankxai/property-os-template#readme",
   "scripts": {
-    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs && node scripts/agent-workflow-dry-run.mjs && node mcp/server/scripts/smoke.mjs",
+    "validate": "node scripts/validate-content.mjs && node scripts/privacy-scan.mjs && node scripts/install-plan-smoke.mjs && node scripts/agent-workflow-dry-run.mjs && npm --prefix mcp/server test",
+    "install:plan": "node scripts/create-install-plan.mjs",
+    "test:install-plan": "node scripts/install-plan-smoke.mjs",
     "agent:dry-run": "node scripts/agent-workflow-dry-run.mjs",
-    "mcp:smoke": "node mcp/server/scripts/smoke.mjs",
+    "mcp:smoke": "npm --prefix mcp/server run smoke",
+    "mcp:test": "npm --prefix mcp/server test",
+    "mcp:http": "npm --prefix mcp/server run start:http",
+    "activation:verify": "npm --prefix mcp/server run activation:verify",
+    "audit": "npm audit --audit-level=moderate && npm --prefix mcp/server run audit",
     "privacy": "node scripts/privacy-scan.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
   }
 }

@@ -41,12 +41,12 @@ The portal cockpit should be reviewed after each install milestone:
 1. free fork created
 2. property facts and images replaced
 3. Vercel preview deployed
-4. owner passcode auth configured with `OWNER_PORTAL_SECRET`, `OWNER_PORTAL_PASSCODE_HASH`, `PROPERTY_OS_DEMO_AUTH=false`, and optional `OWNER_PORTAL_API_TOKEN`
-5. `npm run auth:smoke` proves owner/admin route protection and protected owner API behavior
+4. explicit auth mode selected: private one-owner passcode or pre-bound agency OIDC; the portal has no global owner bearer
+5. `npm run auth:smoke` and `npm run identity:smoke` prove fail-closed route, signed-token, role, origin, and schema behavior
 6. `npm run install:proof` exports the public-safe install proof packet
 7. `/api/install/proof-packet` and `/admin/setup` confirm proof score, command checks, missing environment names, owner approval gates, and blocked v1 actions
 8. `db/schema.sql`, `db/rls.sql`, and the owner seed are applied
-9. `npm run db:rls:smoke` proves live Postgres tenant isolation for `PROPERTY_OS_ORG_ID`
+9. `npm run db:rls:smoke` proves live Postgres tenant isolation for `PROPERTY_OS_ORG_ID`; agencies also pass `npm run identity:db:smoke` and a real-provider callback/revocation flow
 10. `/admin/runtime` confirms Postgres adapter, queue posture, and missing environment gates
 11. owner notification webhook or worker tested with sanitized payload
 12. Codex/Claude/MCP agent workspace paired
@@ -70,7 +70,7 @@ An install is not production-ready because the portal builds. Production readine
 - private runtime storage
 - auth and access control
 - database row-level security
-- owner passcode auth smoke
+- selected-mode auth and identity smoke, plus live agency identity proof when applicable
 - install proof packet from `/api/install/proof-packet`
 - live database RLS smoke
 - runtime snapshot review

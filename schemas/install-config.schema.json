@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://property-os.dev/schemas/install-config.schema.json",
+  "title": "Property OS install configuration",
+  "description": "A public-safe deployment intent. Secrets, personal contact data, property addresses, and live URLs are deliberately excluded.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "installationId",
+    "tenantId",
+    "edition",
+    "operatorMode",
+    "portfolio",
+    "deployment",
+    "readiness",
+    "commercial"
+  ],
+  "properties": {
+    "schema": {
+      "const": "property-os.installConfig.v1"
+    },
+    "installationId": {
+      "$ref": "#/$defs/slug"
+    },
+    "tenantId": {
+      "$ref": "#/$defs/slug"
+    },
+    "edition": {
+      "enum": ["community", "partner-install", "managed-ops", "agency-platform"]
+    },
+    "operatorMode": {
+      "enum": ["self-service", "partner-led", "managed"]
+    },
+    "portfolio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["propertyCount", "unitCount", "primaryPropertySlug"],
+      "properties": {
+        "propertyCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000
+        },
+        "unitCount": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "primaryPropertySlug": {
+          "$ref": "#/$defs/slug"
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "portal",
+        "controlPlane",
+        "database",
+        "region",
+        "dataResidencyReviewed",
+        "authMode",
+        "modelProvider",
+        "storageProvider",
+        "notificationProvider"
+      ],
+      "properties": {
+        "portal": {
+          "const": "vercel"
+        },
+        "controlPlane": {
+          "const": "railway"
+        },
+        "database": {
+          "const": "managed-postgres"
+        },
+        "region": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{1,31}$"
+        },
+        "dataResidencyReviewed": {
+          "type": "boolean"
+        },
+        "authMode": {
+          "enum": ["static-private-pilot", "oidc"]
+        },
+        "modelProvider": {
+          "const": "vercel-ai-gateway"
+        },
+        "storageProvider": {
+          "enum": ["vercel-blob", "supabase-storage", "s3-compatible", "tbd"]
+        },
+        "notificationProvider": {
+          "enum": ["resend", "webhook", "email-worker", "tbd"]
+        }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ownerFactsApproved",
+        "mediaRightsApproved",
+        "publicAddressPolicyApproved",
+        "privacyRolesAssigned",
+        "retentionPolicyApproved",
+        "incidentOwnerAssigned",
+        "legalReviewComplete",
+        "notificationRouteApproved"
+      ],
+      "properties": {
+        "ownerFactsApproved": { "type": "boolean" },
+        "mediaRightsApproved": { "type": "boolean" },
+        "publicAddressPolicyApproved": { "type": "boolean" },
+        "privacyRolesAssigned": { "type": "boolean" },
+        "retentionPolicyApproved": { "type": "boolean" },
+        "incidentOwnerAssigned": { "type": "boolean" },
+        "legalReviewComplete": { "type": "boolean" },
+        "notificationRouteApproved": { "type": "boolean" }
+      }
+    },
+    "commercial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offerId", "supportTier"],
+      "properties": {
+        "offerId": {
+          "enum": [
+            "community",
+            "starter-install",
+            "premium-install",
+            "agency-workspace",
+            "managed-ops",
+            "integration-sprint"
+          ]
+        },
+        "supportTier": {
+          "enum": ["self-supported", "implementation", "managed"]
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "edition": { "const": "community" } },
+        "required": ["edition"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "operatorMode": { "const": "self-service" },
+          "commercial": {
+            "type": "object",
+            "properties": {
+              "offerId": { "const": "community" },
+              "supportTier": { "const": "self-supported" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": { "edition": { "const": "managed-ops" } },
+        "required": ["edition"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "operatorMode": { "const": "managed" },
+          "commercial": {
+            "type": "object",
+            "properties": {
+              "offerId": { "const": "managed-ops" },
+              "supportTier": { "const": "managed" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "type": "object",
+        "properties": { "edition": { "const": "agency-platform" } },
+        "required": ["edition"]
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "deployment": {
+            "type": "object",
+            "properties": { "authMode": { "const": "oidc" } }
+          },
+          "commercial": {
+            "type": "object",
+            "properties": { "offerId": { "const": "agency-workspace" } }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])$"
+    }
+  }
+}

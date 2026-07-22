@@ -18,7 +18,7 @@ Keep the public portal on Vercel unless the repo is intentionally moved.
 | Service | Runtime | Role |
 | --- | --- | --- |
 | portal | Vercel Next.js | public property pages, renter portal, owner/admin UI |
-| postgres | managed Postgres | organizations, properties, tickets, approvals, agent runs |
+| postgres | managed Postgres | organizations, properties, tickets, missions, model runs, owner reviews, accepted-state versions, receipts, transitions, audit |
 | object-storage | Vercel Blob or Supabase Storage | media and documents |
 | property-os-mcp | Railway Node/TS | MCP resources, tools, prompts |
 | queue-worker | Railway Node/TS | weekly digest, retry, dry-run integration jobs |
@@ -42,7 +42,25 @@ Use separate environments for development, preview, and production. Agents may r
 
 ## First Railway Milestone
 
-Deploy only `property-os-mcp` with read-only sample resources and dry-run tools. Add write tools after auth, audit, and owner approval are proven.
+Apply `mcp/server/db/001-control-plane.sql` and `mcp/server/db/002-governed-agent-runtime.sql` in order with a migration role, then deploy `mcp/server` with its Dockerfile, `DATABASE_URL`, and `/readyz` health check. Configure a release-pinned `PROPERTY_OS_AI_MODEL` plus Railway-held `AI_GATEWAY_API_KEY`. Start with one private pilot tenant, a generated bearer token, allowed host/origin policy, durable mission and draft tools, owner review outcomes, dry runs, and the internal controlled-transition proof. External actions remain blocked.
+
+Run `npm run activation:verify` against the deployed endpoint before connecting Vercel. Keep it check-only first, then enable the explicit synthetic write proof in the approved pilot tenant. Archive its redacted receipt with the release evidence.
+
+## Production Auth Milestone
+
+Move from static bearer to OIDC mode before agency or marketplace use. Configure issuer, audience, JWKS URL, tenant claim, role claim, scopes, and the mandatory deployment tenant allowlist. The Vercel portal uses a dedicated client-credentials application and fetches short-lived service tokens; it does not store a global production MCP bearer. Prove portal organization equals service-token tenant equals allowlisted tenant equals activation tenant equals both RLS organizations.
+
+## Railway Template Gate
+
+- root directory `mcp/server`
+- Dockerfile build
+- health check `/readyz`
+- generated secrets, never defaults
+- private Postgres hostname and a non-bypass-RLS runtime role
+- AI Gateway key stored only in Railway and structured drafting pinned by model alias and prompt version
+- one public domain for `/mcp`
+- separate development, preview, and production environments
+- deployment support and update policy documented before Marketplace publication
 
 ## Readiness Milestone
 

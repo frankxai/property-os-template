@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://property-os.dev/schemas/install-plan.schema.json",
+  "title": "Property OS install plan",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "installationId",
+    "tenantId",
+    "edition",
+    "operatorMode",
+    "generatedAt",
+    "sourceConfigHash",
+    "planHash",
+    "posture",
+    "proofStatus",
+    "architecture",
+    "governance",
+    "readiness",
+    "phaseGates",
+    "environment",
+    "migrations",
+    "commands",
+    "acceptance",
+    "successMetrics",
+    "commercial"
+  ],
+  "properties": {
+    "schema": { "const": "property-os.installPlan.v1" },
+    "installationId": { "$ref": "#/$defs/slug" },
+    "tenantId": { "$ref": "#/$defs/slug" },
+    "edition": {
+      "enum": ["community", "partner-install", "managed-ops", "agency-platform"]
+    },
+    "operatorMode": {
+      "enum": ["self-service", "partner-led", "managed"]
+    },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "sourceConfigHash": { "$ref": "#/$defs/hash" },
+    "planHash": { "$ref": "#/$defs/hash" },
+    "posture": { "const": "planned-not-proven" },
+    "proofStatus": { "const": "unverified" },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["portal", "controlPlane", "portalStore", "controlPlaneLedger", "modelRuntime", "databaseBoundary"],
+      "properties": {
+        "portal": { "$ref": "#/$defs/service" },
+        "controlPlane": { "$ref": "#/$defs/service" },
+        "portalStore": { "$ref": "#/$defs/dataStore" },
+        "controlPlaneLedger": { "$ref": "#/$defs/dataStore" },
+        "modelRuntime": { "$ref": "#/$defs/service" },
+        "databaseBoundary": { "type": "string", "minLength": 20 }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "ownerApprovalRequiredFor", "blockedActions", "claimBoundary"],
+      "properties": {
+        "authority": { "const": "draft-only" },
+        "ownerApprovalRequiredFor": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "blockedActions": {
+          "type": "array",
+          "minItems": 6,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "claimBoundary": { "type": "string", "minLength": 20 }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selfAttested", "unresolved", "recommendations"],
+      "properties": {
+        "selfAttested": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" },
+          "minProperties": 8,
+          "maxProperties": 8
+        },
+        "unresolved": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "recommendations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 10 }
+        }
+      }
+    },
+    "phaseGates": {
+      "type": "array",
+      "minItems": 9,
+      "items": { "$ref": "#/$defs/phaseGate" }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vercel", "railway", "operator"],
+      "properties": {
+        "vercel": { "$ref": "#/$defs/environmentGroup" },
+        "railway": { "$ref": "#/$defs/environmentGroup" },
+        "operator": { "$ref": "#/$defs/environmentGroup" }
+      }
+    },
+    "migrations": {
+      "type": "array",
+      "minItems": 7,
+      "items": { "$ref": "#/$defs/migration" }
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 19,
+      "items": { "$ref": "#/$defs/command" }
+    },
+    "acceptance": {
+      "type": "array",
+      "minItems": 8,
+      "items": { "$ref": "#/$defs/acceptanceStep" }
+    },
+    "successMetrics": {
+      "type": "array",
+      "minItems": 6,
+      "items": { "$ref": "#/$defs/successMetric" }
+    },
+    "commercial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["offerId", "supportTier", "commercialStatus", "scopeBoundary"],
+      "properties": {
+        "offerId": { "type": "string", "minLength": 3 },
+        "supportTier": { "type": "string", "minLength": 3 },
+        "commercialStatus": { "const": "not-contracted" },
+        "scopeBoundary": { "type": "string", "minLength": 20 }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 64,
+      "pattern": "^[a-z0-9](?:[a-z0-9-]*[a-z0-9])$"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "service": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "repository", "purpose"],
+      "properties": {
+        "provider": { "type": "string", "minLength": 3 },
+        "repository": { "type": "string", "minLength": 3 },
+        "purpose": { "type": "string", "minLength": 10 }
+      }
+    },
+    "dataStore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider", "logicalDatabase", "isolation", "purpose"],
+      "properties": {
+        "provider": { "const": "managed-postgres" },
+        "logicalDatabase": { "type": "string", "minLength": 3 },
+        "isolation": { "const": "tenant-rls" },
+        "purpose": { "type": "string", "minLength": 10 }
+      }
+    },
+    "phaseGate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "label", "status", "ownerGate", "evidence"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "label": { "type": "string", "minLength": 3 },
+        "status": {
+          "enum": ["planned", "waiting-owner", "configuration-required", "implementation-required", "proof-required"]
+        },
+        "ownerGate": { "type": "boolean" },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 3 }
+        }
+      }
+    },
+    "environmentGroup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredKeys", "optionalKeys", "valuePolicy"],
+      "properties": {
+        "requiredKeys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/environmentKey" }
+        },
+        "optionalKeys": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/environmentKey" }
+        },
+        "valuePolicy": { "type": "string", "minLength": 20 }
+      }
+    },
+    "environmentKey": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]+$"
+    },
+    "migration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["order", "repository", "path", "target", "proof"],
+      "properties": {
+        "order": { "type": "integer", "minimum": 1 },
+        "repository": { "type": "string", "minLength": 3 },
+        "path": { "type": "string", "minLength": 3 },
+        "target": { "enum": ["portal-db", "control-plane-db"] },
+        "proof": { "type": "string", "minLength": 3 }
+      }
+    },
+    "command": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "phase", "command", "proof"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 3 },
+        "phase": { "type": "string", "minLength": 3 },
+        "command": { "type": "string", "minLength": 3 },
+        "proof": { "type": "string", "minLength": 3 }
+      }
+    },
+    "acceptanceStep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "action", "evidence", "ownerApproval"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "action": { "type": "string", "minLength": 10 },
+        "evidence": { "type": "string", "minLength": 3 },
+        "ownerApproval": { "type": "boolean" }
+      }
+    },
+    "successMetric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "hypothesis", "target", "evidence", "status"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "hypothesis": { "type": "string", "minLength": 10 },
+        "target": { "type": "string", "minLength": 3 },
+        "evidence": { "type": "string", "minLength": 3 },
+        "status": { "const": "unmeasured" }
+      }
+    }
+  }
+}
