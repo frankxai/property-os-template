@@ -7,7 +7,8 @@ Use this when moving from local template to paid owner or agency install.
 | Layer | Recommended Start | Notes |
 | --- | --- | --- |
 | Portal | Vercel | Next.js property, renter, owner, and admin routes |
-| Database | Managed Postgres | organizations, properties, tickets, approvals, agent runs, audit events |
+| Portal database | Managed Postgres | tenant-isolated inquiries, support, portal approvals, and portal audit |
+| Control-plane database | Managed Postgres | tenant-isolated missions, approved evidence, model receipts, reviews, and transitions |
 | Storage | Vercel Blob or Supabase Storage | rights-approved media and private documents |
 | Email | Resend or equivalent | owner notifications and weekly digest |
 | MCP | Railway | always-on Property OS MCP server and dry-run tools |
@@ -30,7 +31,8 @@ Portal:
 - `EMAIL_PROVIDER`
 - `OBJECT_STORAGE_PROVIDER`
 - `MCP_SERVER_URL`
-- `AGENT_RUNTIME_URL`
+- `MCP_SERVER_ACCESS_TOKEN`
+- `MCP_SERVER_ORIGIN`
 
 Railway MCP:
 
@@ -45,6 +47,8 @@ Railway MCP:
 
 Do not commit values. Store them in Vercel or Railway environment settings.
 
+The Vercel and Railway `DATABASE_URL` values must point to separate logical databases and least-privilege roles. Do not apply the portal and MCP schemas to the same logical database. The services exchange governed data through the authenticated MCP boundary.
+
 Create the owner passcode materials inside the portal repo with `npm run auth:hash -- "private owner passcode"`. Store the generated `OWNER_PORTAL_SECRET` and `OWNER_PORTAL_PASSCODE_HASH` in the host; never commit the passcode or generated values.
 
 Before owner handoff, run `npm run install:proof` in the portal repo and review `/api/install/proof-packet` through an owner session or trusted `OWNER_PORTAL_API_TOKEN`. The proof packet reports key names and configured booleans only; it does not print secret values.
@@ -53,15 +57,15 @@ Before owner handoff, run `npm run install:proof` in the portal repo and review 
 
 1. Keep portal content static and approved.
 2. Configure owner passcode auth and run `npm run auth:smoke`.
-3. Apply the portal `db/schema.sql`.
-4. Apply the portal `db/rls.sql`.
+3. Apply the portal `db/schema.sql` to the portal database.
+4. Apply the portal `db/rls.sql` to the portal database.
 5. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
 6. Run `npm run db:rls:smoke` against the live database.
 7. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
 8. Turn on runtime database and verify `/admin/runtime`.
 9. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
 10. Wire sanitized owner notification webhook or worker.
-11. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order.
+11. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order to the separate control-plane database.
 12. Deploy MCP server in mission, structured-draft, owner-review, and dry-run mode.
 13. Run one approved-evidence agent draft and record an owner review outcome.
 14. Verify owner approval queue.

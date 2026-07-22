@@ -20,7 +20,11 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: mcp/server/package-lock.json
+          cache-dependency-path: |
+            package-lock.json
+            mcp/server/package-lock.json
+      - name: Install template dependencies
+        run: npm ci
       - name: Install MCP server dependencies
         run: npm ci --prefix mcp/server
       - name: Validate template

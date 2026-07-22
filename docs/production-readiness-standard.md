@@ -7,7 +7,7 @@
 - private data boundary reviewed
 - privacy scan passes
 - secrets are environment-only
-- runtime database has tenant isolation
+- portal and control-plane databases are separate logical databases with tenant isolation and least-privilege roles
 - owner/renter roles are explicit
 - audit log records consequential actions
 
@@ -41,6 +41,7 @@
 
 ### Deployment
 
+- schema-valid install config and stable plan hash recorded before host configuration
 - Vercel preview for portal
 - `/admin/setup` and `/api/install/proof-packet` reviewed before owner handoff
 - Railway only for always-on MCP, workers, or integration services
@@ -48,6 +49,7 @@
 - environment separation
 - rollback path
 - remote activation proof passes in check-only and approved synthetic-write modes
+- generated plan still says `planned-not-proven`; live receipts, not self-attestation, establish readiness
 
 ## Ready Definition
 

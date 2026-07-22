@@ -31,6 +31,8 @@ Property OS Template is a public-safe operating workspace and agent control plan
 - typed MCP resources, prompts, tools, auth, and health endpoints
 - specialist team manifest and bounded swarm topology
 - proposal, decision, receipt, apply, verify, and undo control contract
+- schema-validated, secret-free install configuration and hash-addressed implementation plan
+- separate tenant-isolated portal and control-plane logical databases
 
 ## Release Criteria
 
@@ -43,3 +45,4 @@ Property OS Template is a public-safe operating workspace and agent control plan
 - partner can explain excluded scope
 - every consequential action remains blocked or receipt-controlled
 - provider/model selection is release-pinned configuration, not a hardcoded product claim
+- generated install plans cannot self-certify deployment, security, legal, commercial, or owner acceptance gates

@@ -19,7 +19,7 @@ Use `property-portal-template` when the owner wants a renter-facing website.
 
 ## Runtime Adapter
 
-`property-portal-template` starts in `demo-memory` mode and switches to the Postgres adapter when `DATABASE_URL` is set.
+`property-portal-template` starts in `demo-memory` mode and switches to the Postgres adapter when `DATABASE_URL` is set. This URL is for the portal's tenant-isolated logical database only. Railway uses a separate control-plane database; the portal reaches it through authenticated MCP calls.
 
 Production installs should set:
 
@@ -32,8 +32,9 @@ Production installs should set:
 - `OWNER_PORTAL_PASSCODE_HASH`
 - optional `OWNER_PORTAL_API_TOKEN`
 - optional `OWNER_NOTIFICATION_WEBHOOK_URL`
-- optional `MCP_SERVER_URL`
-- optional `AGENT_RUNTIME_URL`
+- `MCP_SERVER_URL`
+- `MCP_SERVER_ACCESS_TOKEN`
+- `MCP_SERVER_ORIGIN`
 
 The portal writes inquiries, support tickets, approvals, agent runs, listing dry-run audit events, and sanitized notification handoffs. Agents and partner reports should use only sanitized summaries outside the runtime database.
 
@@ -41,8 +42,8 @@ Protected owner/admin API calls require either a signed owner browser session or
 
 Production database install order:
 
-1. Apply portal `db/schema.sql`.
-2. Apply portal `db/rls.sql` so Postgres enforces tenant isolation through `property_os.organization_id`.
+1. Apply portal `db/schema.sql` to the portal logical database.
+2. Apply portal `db/rls.sql` there so Postgres enforces tenant isolation through `property_os.organization_id`.
 3. Seed `db/seed-sample.sql` for local smoke or a private owner seed for the real install.
 4. Set `PROPERTY_OS_ORG_ID` to the seeded organization.
 5. Run `npm run db:rls:smoke` against the live `DATABASE_URL`.
@@ -50,6 +51,8 @@ Production database install order:
 7. Check `/api/install/proof-packet`, `/api/runtime/snapshot`, `/admin/setup`, and `/admin/runtime`.
 
 The portal issue templates include install support, integration requests, safety review, and portal QA. Use them as the public-safe support layer for community forks and partner installs.
+
+Use separate logical databases for the portal and MCP. Never apply their migrations to the same logical database. Their runtime ledgers are deliberately isolated and connected by the MCP API contract.
 
 ## Do Not Wire Yet
 

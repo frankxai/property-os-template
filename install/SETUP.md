@@ -1,5 +1,16 @@
 # Setup
 
+## Install Contract
+
+Before private content or infrastructure work, create a public-safe install configuration and generate its implementation packet:
+
+```bash
+npm ci
+npm run install:plan -- --config install/sample-install.config.json
+```
+
+Review `docs/self-service-install-plan.md`. Record the source config hash and plan hash in the implementation issue. The packet remains planned and unverified; it never substitutes for live proof or owner acceptance.
+
 ## Private Folder
 
 1. Copy this repo to a private folder.

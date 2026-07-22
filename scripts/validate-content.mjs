@@ -20,6 +20,8 @@ const requiredFiles = [
   ".claude/commands/commercial-offer.md",
   ".claude/commands/agent-run-audit.md",
   ".claude/commands/production-readiness.md",
+  ".codex/commands/install-client.md",
+  ".github/workflows/ci.yml",
   "docs/prd-lite.md",
   "docs/user-flows.md",
   "docs/success-metrics.md",
@@ -31,6 +33,7 @@ const requiredFiles = [
   "docs/implementer-business-model.md",
   "docs/production-readiness-standard.md",
   "docs/remote-activation-proof.md",
+  "docs/self-service-install-plan.md",
   "docs/ai-architecture-and-control-plane.md",
   "docs/product-editions-and-economics.md",
   "agents/team.manifest.json",
@@ -56,6 +59,11 @@ const requiredFiles = [
   "mcp/server/scripts/postgres-integration.mjs",
   "mcp/server/Dockerfile",
   "mcp/server/railway.toml",
+  "schemas/install-config.schema.json",
+  "schemas/install-plan.schema.json",
+  "install/sample-install.config.json",
+  "scripts/create-install-plan.mjs",
+  "scripts/install-plan-smoke.mjs",
   "railway/architecture.md",
   "railway/property-os-mcp.service.json",
   "install/HOSTED-RUNTIME.md",
@@ -70,6 +78,25 @@ for (const file of requiredFiles) {
 }
 
 const requiredSnippetChecks = [
+  {
+    file: ".github/workflows/ci.yml",
+    snippets: [
+      "cache-dependency-path: |",
+      "package-lock.json",
+      "run: npm ci",
+      "npm ci --prefix mcp/server"
+    ]
+  },
+  {
+    file: "docs/self-service-install-plan.md",
+    snippets: [
+      "npm run install:plan",
+      "planned-not-proven",
+      "separate logical Postgres databases",
+      "Never point their `DATABASE_URL` values at the same logical database",
+      "plan hash"
+    ]
+  },
   {
     file: "docs/remote-activation-proof.md",
     snippets: [
@@ -92,6 +119,7 @@ const requiredSnippetChecks = [
       "npm run db:rls:smoke",
       "npm run install:proof",
       "/api/install/proof-packet",
+      "separate logical databases",
       "Protected owner/admin API calls"
     ]
   },
@@ -105,7 +133,8 @@ const requiredSnippetChecks = [
       "npm run auth:smoke",
       "npm run db:rls:smoke",
       "npm run install:proof",
-      "/api/install/proof-packet"
+      "/api/install/proof-packet",
+      "separate logical databases"
     ]
   },
   {

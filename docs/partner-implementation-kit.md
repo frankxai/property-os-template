@@ -18,6 +18,7 @@ Help owners and agencies launch a cleaner, safer, more premium property operatin
 - managed operations proposal
 - configured owner control center and first three bounded agent missions
 - security, authority, RLS, runtime, and preview proof packet
+- schema-valid install config, source config hash, and stable install plan hash
 
 ## Offer Ladder
 
@@ -51,6 +52,7 @@ Do not promise:
 
 ## Handoff Proof
 
+- generated plan remains `planned-not-proven` and is linked to live evidence rather than edited into a pass
 - validation output
 - privacy scan output
 - portal preview
@@ -65,9 +67,10 @@ Do not promise:
 
 1. Discover the current owner, renter, listing, vacancy, and maintenance journey.
 2. Define the data boundary and exact owner authority before importing data.
-3. Install approved facts and the portal in preview.
-4. Run security, privacy, database isolation, authority, performance, accessibility, and visual QA gates.
-5. Train the owner on decisions, urgent escalation, weekly review, and service limitations.
-6. Handoff evidence, retention policy, incident path, support scope, and 30-day measurement plan.
+3. Generate the secret-free install plan and record both hashes in the implementation issue.
+4. Install approved facts and the portal in preview.
+5. Run security, privacy, database isolation, authority, performance, accessibility, and visual QA gates.
+6. Train the owner on decisions, urgent escalation, weekly review, and service limitations.
+7. Handoff evidence, retention policy, incident path, support scope, and 30-day measurement plan.
 
 Partners may customize brand, onboarding, integrations, analytics, and managed operations. They must not remove attribution required by third-party licenses, weaken safety gates, imply legal compliance, or claim autonomous external action that is not actually receipt-controlled and reversible.
