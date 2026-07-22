@@ -10,7 +10,7 @@ Use this when moving from local template to paid owner or agency install.
 | Portal database | Managed Postgres | tenant-isolated inquiries, support, portal approvals, and portal audit |
 | Control-plane database | Managed Postgres | tenant-isolated missions, approved evidence, model receipts, reviews, and transitions |
 | Storage | Vercel Blob or Supabase Storage | rights-approved media and private documents |
-| Email | Resend or equivalent | owner notifications and weekly digest |
+| Notification adapter | Resend worker, n8n, Make, or equivalent signed webhook receiver | primary and fallback owner routes with provider receipts |
 | MCP | Railway | always-on Property OS MCP server and dry-run tools |
 | Worker | Railway | weekly digest, retries, and integration dry-run jobs |
 
@@ -20,13 +20,16 @@ Portal:
 
 - `DATABASE_URL`
 - `APP_BASE_URL`
-- `OWNER_NOTIFICATION_EMAIL`
 - `PROPERTY_OS_ORG_ID`
 - `PROPERTY_OS_DEMO_AUTH`
 - `OWNER_PORTAL_SECRET`
 - `OWNER_PORTAL_PASSCODE_HASH`
 - `OWNER_PORTAL_API_TOKEN` (optional automation bearer for protected owner APIs)
-- `OWNER_NOTIFICATION_WEBHOOK_URL` (optional n8n, Make, Railway, or email-worker bridge)
+- `OWNER_NOTIFICATION_WEBHOOK_URL`
+- `OWNER_NOTIFICATION_WEBHOOK_SIGNING_SECRET`
+- `OWNER_NOTIFICATION_FALLBACK_WEBHOOK_URL`
+- `OWNER_NOTIFICATION_FALLBACK_SIGNING_SECRET`
+- `OWNER_NOTIFICATION_WORKER_TOKEN`
 - `GITHUB_ISSUE_REPO`
 - `EMAIL_PROVIDER`
 - `OBJECT_STORAGE_PROVIDER`
@@ -59,18 +62,20 @@ Before owner handoff, run `npm run install:proof` in the portal repo and review 
 2. Configure owner passcode auth and run `npm run auth:smoke`.
 3. Apply the portal `db/schema.sql` to the portal database.
 4. Apply the portal `db/rls.sql` to the portal database.
-5. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
-6. Run `npm run db:rls:smoke` against the live database.
-7. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
-8. Turn on runtime database and verify `/admin/runtime`.
-9. Log inquiries, support, approvals, agent runs, listing dry-runs, and audit events.
-10. Wire sanitized owner notification webhook or worker.
-11. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order to the separate control-plane database.
-12. Deploy MCP server in mission, structured-draft, owner-review, and dry-run mode.
-13. Run one approved-evidence agent draft and record an owner review outcome.
-14. Verify owner approval queue.
-15. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, and visual QA.
-16. Keep listing publication manual.
+5. Apply `db/002-notification-lifecycle.sql` for an upgrade; fresh schema installs already include the notification tables.
+6. Seed `organizations` and `properties` for `PROPERTY_OS_ORG_ID`.
+7. Run `npm run db:rls:smoke` against the live database.
+8. Configure independently signed primary and fallback webhook routes plus the scoped worker token.
+9. Run `npm run notification:smoke`, then collect live provider delivery, fallback, payload-hash, and acknowledgement receipts.
+10. Run `npm run install:proof` and attach the packet to the owner or partner handoff.
+11. Turn on runtime database and verify `/admin/runtime` and `/admin/notifications`.
+12. Log inquiries, support, approvals, agent runs, listing dry-runs, notification events, and audit events.
+13. Apply MCP migrations `001-control-plane.sql` and `002-governed-agent-runtime.sql` in order to the separate control-plane database.
+14. Deploy MCP server in mission, structured-draft, owner-review, and dry-run mode.
+15. Run one approved-evidence agent draft and record an owner review outcome.
+16. Verify owner approval and notification acknowledgement queues.
+17. Run privacy, validation, build, smoke, auth smoke, install proof, RLS smoke, notification smoke, and visual QA.
+18. Keep listing publication manual.
 
 ## Blocked Until Proven
 

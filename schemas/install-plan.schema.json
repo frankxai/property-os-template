@@ -101,7 +101,7 @@
     },
     "phaseGates": {
       "type": "array",
-      "minItems": 7,
+      "minItems": 8,
       "items": { "$ref": "#/$defs/phaseGate" }
     },
     "environment": {
@@ -116,7 +116,7 @@
     },
     "migrations": {
       "type": "array",
-      "minItems": 4,
+      "minItems": 5,
       "items": { "$ref": "#/$defs/migration" }
     },
     "commands": {

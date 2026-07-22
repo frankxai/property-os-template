@@ -19,6 +19,7 @@ Help owners and agencies launch a cleaner, safer, more premium property operatin
 - configured owner control center and first three bounded agent missions
 - security, authority, RLS, runtime, and preview proof packet
 - schema-valid install config, source config hash, and stable install plan hash
+- signed owner-notification primary, fallback, and acknowledgement proof
 
 ## Offer Ladder
 
@@ -62,6 +63,7 @@ Do not promise:
 - weekly review checklist
 - named data controller, support owner, incident contact, and rollback owner
 - acceptance record showing what is live, manual, blocked, and deferred
+- provider receipts proving the urgent route; local mock output alone is not delivery evidence
 
 ## Delivery Standard
 
@@ -69,7 +71,7 @@ Do not promise:
 2. Define the data boundary and exact owner authority before importing data.
 3. Generate the secret-free install plan and record both hashes in the implementation issue.
 4. Install approved facts and the portal in preview.
-5. Run security, privacy, database isolation, authority, performance, accessibility, and visual QA gates.
+5. Run security, privacy, database isolation, authority, signed notification lifecycle, performance, accessibility, and visual QA gates.
 6. Train the owner on decisions, urgent escalation, weekly review, and service limitations.
 7. Handoff evidence, retention policy, incident path, support scope, and 30-day measurement plan.
 

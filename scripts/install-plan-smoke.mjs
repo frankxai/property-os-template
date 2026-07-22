@@ -31,10 +31,17 @@ assert.deepEqual(first.governance.blockedActions, [
   "change_price_or_availability"
 ]);
 assert.ok(first.environment.vercel.requiredKeys.includes("MCP_SERVER_ACCESS_TOKEN"));
+assert.ok(first.environment.vercel.requiredKeys.includes("OWNER_NOTIFICATION_WEBHOOK_SIGNING_SECRET"));
+assert.ok(first.environment.vercel.requiredKeys.includes("OWNER_NOTIFICATION_FALLBACK_SIGNING_SECRET"));
+assert.ok(first.environment.vercel.requiredKeys.includes("OWNER_NOTIFICATION_WORKER_TOKEN"));
 assert.ok(first.environment.railway.requiredKeys.includes("PROPERTY_OS_MCP_AUTH_TOKEN"));
 assert.ok(first.environment.operator.requiredKeys.includes("PROPERTY_OS_REMOTE_MCP_TOKEN"));
 assert.ok(first.commands.some((entry) => entry.command === "npm run activation:verify"));
+assert.ok(first.commands.some((entry) => entry.command === "npm run notification:smoke"));
+assert.ok(first.commands.some((entry) => entry.command === "npm run notification:visual"));
+assert.ok(first.migrations.some((entry) => entry.path === "db/002-notification-lifecycle.sql" && entry.target === "portal-db"));
 assert.ok(first.acceptance.some((entry) => entry.id === "owner-review" && entry.ownerApproval));
+assert.ok(first.acceptance.some((entry) => entry.id === "urgent-route" && /fallback/i.test(entry.action)));
 assert.equal(first.successMetrics.every((metric) => metric.status === "unmeasured"), true);
 
 const serialized = JSON.stringify(first);

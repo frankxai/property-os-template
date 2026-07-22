@@ -140,21 +140,30 @@ function environmentPlan(config) {
       requiredKeys: [
         "DATABASE_URL",
         "APP_BASE_URL",
-        "OWNER_NOTIFICATION_EMAIL",
         "PROPERTY_OS_ORG_ID",
         ...portalIdentityKeys,
         "MCP_SERVER_URL",
         "MCP_SERVER_ACCESS_TOKEN",
-        "MCP_SERVER_ORIGIN"
+        "MCP_SERVER_ORIGIN",
+        "OWNER_NOTIFICATION_WEBHOOK_URL",
+        "OWNER_NOTIFICATION_WEBHOOK_SIGNING_SECRET",
+        "OWNER_NOTIFICATION_FALLBACK_WEBHOOK_URL",
+        "OWNER_NOTIFICATION_FALLBACK_SIGNING_SECRET",
+        "OWNER_NOTIFICATION_WORKER_TOKEN"
       ],
       optionalKeys: [
         "OWNER_PORTAL_API_TOKEN",
-        "OWNER_NOTIFICATION_WEBHOOK_URL",
         "GITHUB_ISSUE_REPO",
         "RUNTIME_STORE",
         "EMAIL_PROVIDER",
         "OBJECT_STORAGE_PROVIDER",
-        "MCP_REQUEST_TIMEOUT_MS"
+        "MCP_REQUEST_TIMEOUT_MS",
+        "OWNER_NOTIFICATION_MAX_ATTEMPTS",
+        "OWNER_NOTIFICATION_RETRY_BASE_MS",
+        "OWNER_NOTIFICATION_ACK_TIMEOUT_MS",
+        "OWNER_NOTIFICATION_CLAIM_LEASE_MS",
+        "OWNER_NOTIFICATION_REQUEST_TIMEOUT_MS",
+        "OWNER_NOTIFICATION_BATCH_SIZE"
       ],
       valuePolicy: "Store values only in Vercel environment settings; the plan records key names, never values."
     },
@@ -229,6 +238,13 @@ function phaseGates(config, unresolved) {
       status: "configuration-required",
       ownerGate: false,
       evidence: ["control-plane migration receipt", "Railway ready check", "remote activation receipt"]
+    },
+    {
+      id: "owner-notifications",
+      label: "Owner notification lifecycle",
+      status: "configuration-required",
+      ownerGate: true,
+      evidence: ["signed primary receipt", "bounded retry receipt", "signed fallback receipt", "idempotent owner acknowledgement"]
     },
     {
       id: "portal-preview",
@@ -354,7 +370,7 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
         provider: "managed-postgres",
         logicalDatabase: "portal-db",
         isolation: "tenant-rls",
-        purpose: "Inquiries, support, portal approvals, operational audit, and public-facing runtime state."
+        purpose: "Inquiries, support, portal approvals, notification outbox and events, operational audit, and public-facing runtime state."
       },
       controlPlaneLedger: {
         provider: "managed-postgres",
@@ -399,13 +415,20 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       },
       {
         order: 3,
+        repository: "property-portal-template",
+        path: "db/002-notification-lifecycle.sql",
+        target: "portal-db",
+        proof: "notification schema and forced-RLS receipt"
+      },
+      {
+        order: 4,
         repository: "property-os-template",
         path: "mcp/server/db/001-control-plane.sql",
         target: "control-plane-db",
         proof: "control-plane schema receipt"
       },
       {
-        order: 4,
+        order: 5,
         repository: "property-os-template",
         path: "mcp/server/db/002-governed-agent-runtime.sql",
         target: "control-plane-db",
@@ -424,8 +447,10 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       { repository: "property-portal-template", phase: "preview-gates", command: "npm run smoke", proof: "renter and owner route smoke passes" },
       { repository: "property-portal-template", phase: "identity", command: "npm run auth:smoke", proof: "protected routes and APIs reject unauthorized access" },
       { repository: "property-portal-template", phase: "data-plane", command: "npm run db:rls:smoke", proof: "live portal tenant isolation passes" },
+      { repository: "property-portal-template", phase: "owner-notifications", command: "npm run notification:smoke", proof: "signed outbox, retry, urgent fallback, and idempotent acknowledgement pass with zero downstream actions" },
       { repository: "property-portal-template", phase: "handoff", command: "npm run install:proof", proof: "secret-free install proof packet" },
       { repository: "property-portal-template", phase: "preview-gates", command: "npm run visual:qa", proof: "desktop and mobile visual evidence passes" },
+      { repository: "property-portal-template", phase: "preview-gates", command: "npm run notification:visual", proof: "desktop and mobile notification console evidence passes" },
       { repository: "property-portal-template", phase: "security", command: "npm run audit", proof: "dependency audit passes" }
     ],
     acceptance: [
@@ -434,7 +459,7 @@ export async function createInstallPlan(config, { generatedAt = new Date().toISO
       { id: "control-ledger", action: "Apply MCP migrations to its separate logical database and non-bypass runtime role.", evidence: "migration and RLS receipt", ownerApproval: false },
       { id: "remote-activation", action: "Run check-only activation before enabling the approved synthetic write proof.", evidence: "redacted activation receipt", ownerApproval: true },
       { id: "owner-review", action: "Create one evidence-grounded draft and reject it in the owner workbench.", evidence: "model, evidence, output, and review hashes", ownerApproval: true },
-      { id: "urgent-route", action: "Trigger a synthetic urgent request and acknowledge the approved fallback route.", evidence: "delivery and acknowledgement receipt", ownerApproval: true },
+      { id: "urgent-route", action: "Trigger a synthetic urgent request; prove signed primary delivery, bounded retry, fallback after the acknowledgement timeout, and idempotent owner acknowledgement.", evidence: "provider delivery, fallback, payload hash, and owner acknowledgement receipts", ownerApproval: true },
       { id: "portal-preview", action: "Inspect the exact Vercel preview on desktop and mobile before production.", evidence: "preview URL and visual QA evidence", ownerApproval: true },
       { id: "weekly-loop", action: "Run one timed weekly owner review and record unresolved work.", evidence: "timestamped weekly review receipt", ownerApproval: true },
       { id: "launch-record", action: "Sign what is live, manual, blocked, deferred, supported, and reversible.", evidence: "owner acceptance record", ownerApproval: true }

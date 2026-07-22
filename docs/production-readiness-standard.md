@@ -23,7 +23,7 @@
 ### Reliability
 
 - forms degrade gracefully
-- notifications retry safely
+- notifications use a durable outbox, signed delivery, bounded retries, acknowledgement timeout, and an independently signed fallback route
 - integrations have dry-run mode
 - failed agent runs are visible
 - model timeouts and schema/policy failures fail closed without downstream work
@@ -50,6 +50,7 @@
 - rollback path
 - remote activation proof passes in check-only and approved synthetic-write modes
 - generated plan still says `planned-not-proven`; live receipts, not self-attestation, establish readiness
+- `/admin/notifications` shows delivery, failure, fallback, and acknowledgement without implying downstream renter or vendor action
 
 ## Ready Definition
 
@@ -57,7 +58,7 @@ An install is ready for paid usage when:
 
 - owner can update property facts
 - renter can self-serve approved information
-- owner receives urgent issues
+- owner receives and acknowledges urgent issues through a provider-proven primary and fallback route
 - listing drafts are channel-ready
 - no private data appears in public artifacts
 - validation, privacy, typecheck, build, smoke, and visual QA pass
