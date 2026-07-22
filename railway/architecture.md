@@ -44,6 +44,8 @@ Use separate environments for development, preview, and production. Agents may r
 
 Apply `mcp/server/db/001-control-plane.sql` and `mcp/server/db/002-governed-agent-runtime.sql` in order with a migration role, then deploy `mcp/server` with its Dockerfile, `DATABASE_URL`, and `/readyz` health check. Configure a release-pinned `PROPERTY_OS_AI_MODEL` plus Railway-held `AI_GATEWAY_API_KEY`. Start with one private pilot tenant, a generated bearer token, allowed host/origin policy, durable mission and draft tools, owner review outcomes, dry runs, and the internal controlled-transition proof. External actions remain blocked.
 
+Run `npm run activation:verify` against the deployed endpoint before connecting Vercel. Keep it check-only first, then enable the explicit synthetic write proof in the approved pilot tenant. Archive its redacted receipt with the release evidence.
+
 ## Production Auth Milestone
 
 Move from static bearer to OIDC mode before agency or marketplace use. Configure issuer, audience, JWKS URL, tenant claim, role claim, scopes, and allowed tenants. The public MCP service is a resource server; identity and authorization policy are not delegated to caller headers.

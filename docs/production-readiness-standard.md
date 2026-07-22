@@ -47,6 +47,7 @@
 - database migration plan
 - environment separation
 - rollback path
+- remote activation proof passes in check-only and approved synthetic-write modes
 
 ## Ready Definition
 
@@ -59,4 +60,5 @@ An install is ready for paid usage when:
 - no private data appears in public artifacts
 - validation, privacy, typecheck, build, smoke, and visual QA pass
 - install proof packet, auth smoke, and live RLS smoke pass for the target install
+- deployed MCP activation receipt proves the four governed tools, evidence/output hashes, model receipt, rejected synthetic review, and zero external actions
 - at least one weekly review loop has been run

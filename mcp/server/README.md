@@ -21,6 +21,8 @@ npm audit --audit-level=moderate
 
 The tests use no secret values and cover SDK interoperability, HTTP auth and Origin denial, tenant isolation, governed model output, prompt-injection and private-input denial before model invocation, invented evidence citations, authority-crossing drafts, owner review outcomes, forged and expired receipts, concurrent single-use consumption, idempotent replay, privacy redaction, blocked external actions, and an embedded Postgres execution of the real migrations and repository.
 
+After Railway and managed Postgres are configured, run `npm run activation:verify` from the repository root. It is check-only by default. With `PROPERTY_OS_ACTIVATION_ALLOW_WRITES=true`, it runs one synthetic mission/evidence/draft/rejection loop and emits a redacted activation packet while asserting that no content or external action was applied. See `docs/remote-activation-proof.md`.
+
 ## Governed Agent Runtime
 
 `record_approved_evidence` lets an authenticated owner place an exact, versioned, privacy-checked fact in the tenant evidence ledger. `run_agent_draft` accepts an existing mission plus one to twelve references; the server resolves their excerpts from that RLS-protected ledger rather than trusting a caller-supplied approval flag. The AI SDK uses a release-pinned `PROPERTY_OS_AI_MODEL`, structured Zod output, bounded retries/tokens/time, content telemetry disabled, and zero model tools. A second deterministic policy pass rejects invented evidence references and copy that claims owner-gated actions happened.

@@ -30,6 +30,7 @@ const requiredFiles = [
   "docs/agentic-service-offering.md",
   "docs/implementer-business-model.md",
   "docs/production-readiness-standard.md",
+  "docs/remote-activation-proof.md",
   "docs/ai-architecture-and-control-plane.md",
   "docs/product-editions-and-economics.md",
   "agents/team.manifest.json",
@@ -50,6 +51,8 @@ const requiredFiles = [
   "mcp/server/scripts/adversarial.mjs",
   "mcp/server/scripts/http-smoke.mjs",
   "mcp/server/scripts/agent-runtime.mjs",
+  "mcp/server/scripts/remote-activation.mjs",
+  "mcp/server/scripts/remote-activation-smoke.mjs",
   "mcp/server/scripts/postgres-integration.mjs",
   "mcp/server/Dockerfile",
   "mcp/server/railway.toml",
@@ -67,6 +70,16 @@ for (const file of requiredFiles) {
 }
 
 const requiredSnippetChecks = [
+  {
+    file: "docs/remote-activation-proof.md",
+    snippets: [
+      "npm run activation:verify",
+      "PROPERTY_OS_ACTIVATION_ALLOW_WRITES=true",
+      "contentApplied",
+      "external action list is empty",
+      "rejection review"
+    ]
+  },
   {
     file: "install/PORTAL-WIRING.md",
     snippets: [

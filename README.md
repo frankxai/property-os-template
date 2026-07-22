@@ -33,11 +33,14 @@ npm run mcp:smoke
 
 For the hosted control plane, run `npm run mcp:http`. The local stdio and hosted Streamable HTTP transports expose the same typed resources, prompts, tools, authority policy, and controlled-transition proof.
 
+After Railway and managed Postgres are live, run `npm run activation:verify`. It checks readiness, Postgres mode, auth, tenant scope, authority policy, and the four governed agent tools without writing. Set `PROPERTY_OS_ACTIVATION_ALLOW_WRITES=true` only for the approved synthetic mission/evidence/draft/rejection proof described in `docs/remote-activation-proof.md`.
+
 ## Publish-Ready Paths
 
 - Forkable GitHub workspace: this repo.
 - Portal frontend: `property-portal-template`.
 - Hosted MCP/worker plan: `railway/architecture.md`.
+- Deployed MCP release receipt: `docs/remote-activation-proof.md`.
 - Vercel/v0 implementation brief: `docs/v0-vercel-template.md`.
 - Partner offer and handoff: `docs/partner-implementation-kit.md`.
 - Implementation readiness cockpit: `docs/implementation-readiness-cockpit.md`.
@@ -72,6 +75,7 @@ For the hosted control plane, run `npm run mcp:http`. The local stdio and hosted
 - `docs/agentic-service-offering.md`: agentic-as-a-service packaging.
 - `docs/implementer-business-model.md`: how agencies and technical partners can earn with the template.
 - `docs/production-readiness-standard.md`: security, performance, reliability, deployment, and agent governance gates.
+- `docs/remote-activation-proof.md`: check-only and explicit synthetic-write proof for the deployed Railway control plane.
 - `docs/ai-architecture-and-control-plane.md`: provider-neutral model routing, MCP deployment, receipts, and failure boundaries.
 - `docs/product-editions-and-economics.md`: community, partner, managed-service, and agency product boundary.
 - `docs/integration-readiness.md`: manual-first and API-later integration gates.
